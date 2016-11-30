@@ -1,0 +1,2 @@
+line: PLUS EOF;
+PLUS: '+';
