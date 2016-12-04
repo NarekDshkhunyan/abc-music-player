@@ -7,7 +7,7 @@ import java.io.File;
  * @author alican, mabunass, narek
  */
 public interface Music {
-    // Music = Rest(duration: double) + Note(duration: double, pitch: Pitch) + Together(voice: Music, rest: Music)
+    // Music = Rest(duration: double) + Note(duration: double, pitch: Pitch) + MultipleVoices(voice: Music, rest: Music)
     
     /**
      * parses abc file into Music
@@ -17,7 +17,7 @@ public interface Music {
     public static Music parseMusic(File musicFile) {
         throw new RuntimeException("Unimplemented");
     }
-    
+        
     /**
      * @return double corresponding to the total duration in number of beats for given piece of music
      */
@@ -31,14 +31,30 @@ public interface Music {
      *         n'.pitch() == n.pitch().transpose(semitonesUp), and m' is
      *         otherwise identical to m
      */
-    Music transpose(int semitonesUp);
+    public Music transpose(int semitonesUp);
     
     /**
      * Play this piece.
      * @param player player to play on
      * @param atBeat when to play
      */
-    void play(SequencePlayer player, double atBeat);
+    public void play(SequencePlayer player, double atBeat);
+    
+    /**
+     * adds the specified voice to the music to be played simultaneously
+     * @param voice the voice to add
+     * @return new Music that now includes the extra voice
+     */
+    public Music addVoice(Music voice);
+    
+    /**
+     * concatenates two pieces of music
+     * @param music1 first piece to be concatenated
+     * @param music2 piece to be added to end of music1
+     * @return new Music representing a sequence of music1 and music2
+     */
+    public Music concat(Music music1, Music music2);
+    
     
     
 }
