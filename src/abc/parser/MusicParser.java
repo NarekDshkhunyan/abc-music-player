@@ -82,11 +82,8 @@ public class MusicParser {
                  }
                  
                  case DEFAULTLENGTH: {
-                     for (ParseTree<AbcGrammar> child : currentChild) {
-                         if (child.getName() == AbcGrammar.DIGIT || child.getContents() == "/") {
-                             length = length + child.getContents();
-                         }
-                     }
+                     length = currentChild.childrenByName(AbcGrammar.NOTELENGTHSTRICT).get(0).getContents();
+                     lengthDefined = true;
                      if (!tempoDefined) {
                          tempoBaseNote = length;
                      }
@@ -110,6 +107,7 @@ public class MusicParser {
                  }
                  
                  case TEMPOFIELD: {
+                     tempoDefined = true;
                      ParseTree<AbcGrammar> tempoNode = currentChild.childrenByName(AbcGrammar.TEMPO).get(0);
                      String tempo = tempoNode.getContents();
                      String[] splitTempo = tempo.split("=");
@@ -128,7 +126,7 @@ public class MusicParser {
                  }
                  
                  case LINE: {
-                     System.out.println(currentChild.getContents());
+                     //System.out.println(currentChild.getContents());
                      List<ParseTree<AbcGrammar>> midtunefields = currentChild.childrenByName(AbcGrammar.MIDTUNEFIELD);
                      List<ParseTree<AbcGrammar>> elements = currentChild.childrenByName(AbcGrammar.ELEMENT);
                      if (midtunefields.isEmpty()) {
