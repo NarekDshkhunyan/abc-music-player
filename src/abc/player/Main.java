@@ -1,5 +1,12 @@
 package abc.player;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import abc.sound.Music;
+
 /**
  * Main entry point of your application.
  */
@@ -19,6 +26,13 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        // CALL play() HERE USING ARGS
+        Queue<String> arguments = new LinkedList<String>(Arrays.asList(args));
+        if (arguments.isEmpty()) {
+            throw new RuntimeException("No abc file specified!");
+        } else {
+            String fileName = arguments.remove();
+            File abcFile = new File(fileName);
+            Music.parseMusic(abcFile);
+        }
     }
 }

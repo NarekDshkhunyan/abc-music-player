@@ -1,2 +1,9 @@
-root: NUMBER EOF;
-NUMBER: [0-9]+;
+root ::= header music
+
+@skip WHITESPACE{
+	header ::= number
+	
+	number ::= "X:" DIGIT+ eol
+}
+
+

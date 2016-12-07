@@ -1,82 +1,83 @@
-line: PLUS EOF;
-PLUS: '+';
+// A subset of abc 2.1 in BNF format
 
-abc-tune ::= abc-header abc-music
+root ::= header music;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Header
+// Header
 
-; ignore WHITESPACE between terminals in the header
+// ignore WHITESPACE between terminals in the header
 
-abc-header ::= field-number comment* field-title other-fields* field-key
 
-field-number ::= "X:" DIGIT+ end-of-line
-field-title ::= "T:" text end-of-line
-other-fields ::= field-composer | field-default-length | field-meter | field-tempo | field-voice | comment
-field-composer ::= "C:" text end-of-line
-field-default-length ::= "L:" note-length-strict end-of-line
-field-meter ::= "M:" meter end-of-line
-field-tempo ::= "Q:" tempo end-of-line
-field-voice ::= "V:" text end-of-line
-field-key ::= "K:" key end-of-line
+@skip WHITESPACE{
+	header ::= number comment* title others* keyfield;
+	
+	number ::= "X:" DIGIT+ eol;
+	title ::= "T:" text eol;
+	others ::= composer | defaultlength | meterfield | tempofield | voice | comment;
+	composer ::= "C:" text eol;
+	defaultlength ::= "L:"  DIGIT+ "/" DIGIT+ eol;
+	meterfield ::= "M:" meter eol;
+	tempofield ::= "Q:" tempo eol;
+	voice ::= "V:" text eol;
+	keyfield ::= "K:" key eol;
+	
+	key ::= keynote modeminor?;
+	keynote ::= basenote keyaccidental?;
+	keyaccidental ::= "#" | "b";
+	modeminor ::= "m";
+	
+	meter ::= "C" | "C|" | meterfraction;
+	meterfraction ::= DIGIT+ "/" DIGIT+;
+	
+	tempo ::= meterfraction "=" DIGIT+;
+}
 
-key ::= keynote mode-minor?
-keynote ::= basenote key-accidental?
-key-accidental ::= "#" | "b"
-mode-minor ::= "m"
+// Music
 
-meter ::= "C" | "C|" | meter-fraction
-meter-fraction ::= DIGIT+ "/" DIGIT+
+// WHITESPACE is explicit in the body, don't automatically ignore it
 
-tempo ::= meter-fraction "=" DIGIT+
+music ::= line+;
+line ::= element* NEWLINE | midtunefield | comment;
+element ::= noteelement | tupletelement | barline | nthrepeat | WHITESPACE;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Music
+noteelement ::= note | multinote;
 
-; WHITESPACE is explicit in the body, don't automatically ignore it
+// note is either a pitch or a rest;
+note ::= noteorrest notelength?;
+noteorrest ::= pitch | rest;
+pitch ::= accidental? basenote octave?;
+octave ::= "'"+ | ","+;
+notelength ::= (DIGIT+)? ("/" (DIGIT+)?)?;
+notelengthstrict ::= DIGIT+ "/" DIGIT+;
 
-abc-music ::= abc-line+
-abc-line ::= element* NEWLINE | mid-tune-field | comment
-element ::= note-element | tuplet-element | barline | nth-repeat | WHITESPACE 
+// "^" is sharp, "_" is flat, and "=" is neutral
+accidental ::= "^" | "^^" | "_" | "__" | "=";
 
-note-element ::= note | multi-note
+basenote ::= "C" | "D" | "E" | "F" | "G" | "A" | "B" | "c" | "d" | "e" | "f" | "g" | "a" | "b";
 
-;; note is either a pitch or a rest
-note ::= note-or-rest note-length?
-note-or-rest ::= pitch | rest
-pitch ::= accidental? basenote octave?
-octave ::= "'"+ | ","+
-note-length ::= (DIGIT+)? ("/" (DIGIT+)?)?
-note-length-strict ::= DIGIT+ "/" DIGIT+
+rest ::= "z";
 
-;; "^" is sharp, "_" is flat, and "=" is neutral
-accidental ::= "^" | "^^" | "_" | "__" | "="
+// tuplets
+tupletelement ::= tupletspec noteelement+;
+tupletspec ::= "(" DIGIT;
 
-basenote ::= "C" | "D" | "E" | "F" | "G" | "A" | "B"
-        | "c" | "d" | "e" | "f" | "g" | "a" | "b"
+// chords
+multinote ::= "[" note+ "]";
 
-rest ::= "z"
+barline ::= "|" | "||" | "[|" | "|]" | ":|" | "|:";
+nthrepeat ::= "[1" | "[2";
 
-;; tuplets
-tuplet-element ::= tuplet-spec note-element+
-tuplet-spec ::= "(" DIGIT 
+// A voice field might reappear in the middle of a piece
+// to indicate the change of a voice
+midtunefield ::= voice;
 
-;; chords
-multi-note ::= "[" note+ "]"
 
-barline ::= "|" | "||" | "[|" | "|]" | ":|" | "|:"
-nth-repeat ::= "[1" | "[2"
+// General
 
-; A voice field might reappear in the middle of a piece
-; to indicate the change of a voice
-mid-tune-field ::= field-voice
+comment ::= "%" text NEWLINE;
+eol ::= comment | NEWLINE;
+text ::= WHITESPACE* (DIGIT | ALPHABET | '.')+ WHITESPACE* (DIGIT | ALPHABET | '.')*;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; General
-
-comment ::= "%" text NEWLINE
-end-of-line ::= comment | NEWLINE
-
-DIGIT ::= [0-9]
-NEWLINE ::= "\n" | "\r" "\n"?
-WHITESPACE ::= " " | "\t"
+DIGIT ::= [0-9];
+ALPHABET ::= [a-zA-Z];
+NEWLINE ::= "\n" | "\r" "\n"?;
+WHITESPACE ::= " " | "\t";

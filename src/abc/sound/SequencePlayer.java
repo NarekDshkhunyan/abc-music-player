@@ -76,6 +76,7 @@ public class SequencePlayer {
      * @param numTicks the number of ticks for which this note should be played; must be >= 0
      */
     public void addNote(int note, int startTick, int numTicks) {
+        System.out.println(startTick+", "+numTicks);
         try {
             // schedule two events in the track, one for starting a note and
             // the other for ending the note.
