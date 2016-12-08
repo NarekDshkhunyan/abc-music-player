@@ -80,7 +80,7 @@ public class SequencePlayerTest {
             
             //Check whether to start at 0 or 1.
             int currentTime = 12;
-            player.addNote(new Pitch('C').toMidiNote(), 125, tpm);
+            player.addNote(new Pitch('C').toMidiNote(), currentTime, tpm);
             player.addNote(new Pitch('C').toMidiNote(), currentTime+=tpm, tpm); // 12
             player.addNote(new Pitch('C').toMidiNote(), (int) (currentTime+=tpm), (int) (tpm*0.75)); // 24
             player.addNote(new Pitch('D').toMidiNote(), (int) (currentTime+=tpm*0.75), (int) (tpm*0.25)); // 33

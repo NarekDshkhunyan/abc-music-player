@@ -67,13 +67,33 @@ public class Note implements Music {
     }
     
     @Override
-    public boolean equals(Object that) {
-        return false;
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Note other = (Note) obj;
+        if (Double.doubleToLongBits(duration) != Double.doubleToLongBits(other.duration))
+            return false;
+        if (pitch == null) {
+            if (other.pitch != null)
+                return false;
+        } else if (!pitch.equals(other.pitch))
+            return false;
+        return true;
     }
     
     @Override
     public int hashCode() {
-        return 0;
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = Double.doubleToLongBits(duration);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((pitch == null) ? 0 : pitch.hashCode());
+        return result;
     }
 
     @Override
