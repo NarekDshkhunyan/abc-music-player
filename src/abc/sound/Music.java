@@ -36,11 +36,14 @@ public interface Music {
      */
     public static Music parseMusic(File musicFile) {
         try {
-            Parser<AbcGrammar> parser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
-            ParseTree<AbcGrammar> tree = parser.parse(musicFile);
-            Header header = HeaderParser.buildHeader(tree);
+            Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+            ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+            Header header = HeaderParser.buildHeader(headerTree);
             System.out.println(header);
-            Music music = MusicParser.buildMusic(tree, header);
+            
+            Parser<AbcGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), AbcGrammar.ROOT);
+            ParseTree<AbcGrammar> musicTree = musicParser.parse(musicFile);
+            Music music = MusicParser.buildMusic(musicTree, header);
             throw new RuntimeException("continue implementation");
             
         } catch (UnableToParseException ex) {

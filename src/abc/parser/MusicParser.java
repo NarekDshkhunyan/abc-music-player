@@ -3,8 +3,10 @@ package abc.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import abc.sound.Header;
 import abc.sound.Music;
@@ -42,14 +44,14 @@ public class MusicParser {
      * 
      * @param pitch Pitch that we want to modify.
      * @param semitone int semitones is the number of semitones we want to modify pitch by.
-     * @param increase boolean, if true: increase the pitch by semitone.
+     * @param change boolean, if true: increase the pitch by semitone.
      *                          if false: decrease the pitch by semitone.
      *                          
      * @return the new modified pitch.
      */
-    private Pitch modifyPitch(Pitch pitch, int semitone, boolean increase){
+    private Pitch modifyPitch(Pitch pitch, int semitone, boolean change){
         Pitch newPitch;
-        if (increase){
+        if (change){
             newPitch = pitch.transpose(semitone);     
         }
         newPitch = pitch.transpose(-1*semitone);
@@ -131,7 +133,74 @@ public class MusicParser {
         
         String keySignature = header.getKey(); //Gets key signature of String
         
-        return null;
+        // start parsing the tree
+        Queue<ParseTree<AbcGrammar>> queue = new LinkedList<>(tree.children());
+        while (queue.size() > 0) {
+            ParseTree<AbcGrammar> currentChild = queue.remove();
+            
+            switch (currentChild.getName()) {
+            
+                case MUSIC: {
+                    break;
+                }
+                
+                case LINE: {
+                    break;
+                }
+                
+                // parse element from here on
+                case ELEMENT: {
+                    break;
+                }
+                
+                case NOTEELEMENT: {
+                    break;
+                }
+                
+                case NOTE: {
+                    break;
+                }
+                
+                case NOTEORREST: {
+                    break;
+                }
+                
+                case PITCH: {
+                    break;
+                }
+                
+                case REST: {
+                    break;
+                }
+                
+                case NOTELENGTH: {
+                    break;
+                }
+                
+                case MULTINOTE: {
+                    break;
+                }
+                
+                case TUPLETELEMENT: {
+                    break;
+                }
+                
+                // parse midtune field from here on
+                case MIDTUNEFIELD: {
+                    break;
+                }
+                
+                case VOICE: {
+                    break;
+                }
+                
+                default: {
+                    break;
+                }
+            }    
     }
-
+        
+    return null;
+    }
+    
 }
