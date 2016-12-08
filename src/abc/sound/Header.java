@@ -4,21 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Header class represents the header of a piece of music in abc notation
  *
  */
 public class Header {
-    
-    public static final String DEFAULT_METER = "4/4";
-    
-    public static final double DEFAULT_LENGTH = 1/8;
-    
-    public static final int DEFAULT_TEMPO_BPM = 100;
-    
-    public static final String DEFAULT_COMPOSER = "Unknown";
     
     private final String meter;
     private final String length;
@@ -41,6 +32,8 @@ public class Header {
     //      for every voice in voices.keySet()
     //      V: voice
     //      K: key
+    //  note that a header might consist of a single voice and that voice may not have been given a name. In that case, voice will be
+    //  represented with ""
     
     // Rep Invariant;
     //  none of the non-primitive fields are null
@@ -94,9 +87,9 @@ public class Header {
         sb.append("M: " + meter + "\n");
         sb.append("Q: " + tempoBaseNote + "=" + tempoBPM + "\n");
         for (String voice : voices.keySet()) {
-            sb.append("V: " + voice);
+            sb.append("V: " + voice +"\n");
         }
-        sb.append("K: " + key + "\n");
+        sb.append("K: " + key);
         return sb.toString();
     }
 
@@ -165,7 +158,7 @@ public class Header {
         if (voices == null) {
             if (other.voices != null)
                 return false;
-        } else if (voices != other.voices)
+        } else if (!voices.equals(other.voices))
             return false;
         return true;
     }
