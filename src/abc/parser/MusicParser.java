@@ -214,9 +214,9 @@ public class MusicParser {
       * @return a Music that the parse tree represents
       */
      static Music buildMusic(ParseTree<AbcGrammar> tree, Header header) {
-         
          String keySignature = header.getKey(); //Gets key signature of String
-            
+         
+         // TODO: Make this mapping outside of this function so that it's not reconstructed every time
          //Mapping between scales with sharp key signatures and affected pitches. ([Major key, Minor key]: [sharp Notes]).
          Map<List<String>, List<Pitches>> sharpKeySignatures = new HashMap<>();
          
