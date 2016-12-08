@@ -38,8 +38,9 @@ public interface Music {
         try {
             Parser<AbcGrammar> parser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
             ParseTree<AbcGrammar> tree = parser.parse(musicFile);
-            Header header = MusicParser.buildHeader(tree);
+            Header header = HeaderParser.buildHeader(tree);
             System.out.println(header);
+            Music music = MusicParser.buildMusic(tree, header);
             throw new RuntimeException("continue implementation");
             
         } catch (UnableToParseException ex) {
