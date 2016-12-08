@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import expressivo.Number;
+
 /**
  * Header class represents the header of a piece of music in abc notation
  *
@@ -29,6 +31,8 @@ public class Header {
     private final String index;
     private final String key;
     private final Map<String, List<String>> voices;
+    
+ 
     
     public Header(String title, String index, String key, String composer, String meter, String length, String tempoBaseNote, int tempoBPM,
                     Map<String, List<String>> voices) {
@@ -54,7 +58,9 @@ public class Header {
     // TODO: Observers for each field
     
     private void checkRep() {
-        
+        assert title.trim().length() > 0; 
+        assert index.trim().length() > 0; 
+        assert key.trim().length() > 0; 
     }
     
     @Override
@@ -88,55 +94,50 @@ public class Header {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Header other = (Header) obj;
-        if (composer == null) {
-            if (other.composer != null)
-                return false;
-        } else if (!composer.equals(other.composer))
-            return false;
-        if (index != other.index)
-            return false;
-        if (key == null) {
-            if (other.key != null)
-                return false;
-        } else if (!key.equals(other.key))
-            return false;
-        if (length == null) {
-            if (other.length != null)
-                return false;
-        } else if (!length.equals(other.length))
-            return false;
-        if (meter == null) {
-            if (other.meter != null)
-                return false;
-        } else if (!meter.equals(other.meter))
-            return false;
-        if (tempoBPM != other.tempoBPM)
-            return false;
-        if (tempoBaseNote == null) {
-            if (other.tempoBaseNote != null)
-                return false;
-        } else if (!tempoBaseNote.equals(other.tempoBaseNote))
-            return false;
-        if (title == null) {
-            if (other.title != null)
-                return false;
-        } else if (!title.equals(other.title))
-            return false;
-        if (voices == null) {
-            if (other.voices != null)
-                return false;
-        } else if (voices != (other.voices))
-            return false;
-        return true;
+    public boolean equals(Object thatObject) {
+        if (!(thatObject instanceof Header)) return false;
+        Header thatHeader = (Header) thatObject;
+        return this == thatHeader;
     }
     
+    /** Returns the meter */
+    public String getMeter() {
+        return this.meter;
+    }
+    
+    /** Returns the length */
+    public String getLength() {
+        return this.length;
+    }
+    
+    /** Returns tempo base note */
+    public String getTempoBaseNote() {
+        return this.tempoBaseNote;
+    }
+    
+    /** Returns tempo bpm */
+    public int getTempoBPM() {
+        return this.tempoBPM;
+    }
+    
+    /** Returns the composer */
+    public String getComposer() {
+        return this.composer;
+    }
+    
+    /** Returns the title */
+    public String getTitle() {
+        return this.title;
+    }
+    
+    /** Returns the index */
+    public String getIndex() {
+        return this.index;
+    }
+    
+    /** Returns the key */
+    public String getKey() {
+        return this.key;
+    }
     
 }
