@@ -38,17 +38,17 @@ public class Note implements Music {
 
     @Override
     public double duration() {
-        return 0;
+        return this.duration;
     }
 
     @Override
     public Music transpose(int semitonesUp) {
-        return null;
+        return new Note(pitch.transpose(semitonesUp), duration);
     }
 
     @Override
     public void play(SequencePlayer player, double atBeat) {
-
+        //player.addNote(pitch, atBeat, duration);
     }
     
     @Override

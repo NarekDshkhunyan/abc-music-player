@@ -138,4 +138,9 @@ public class Header {
         return this.key;
     }
     
+    /** Returns the voices */
+    public Map<String, List<String>> getVoices() {
+        return this.voices;
+    }
+    
 }
