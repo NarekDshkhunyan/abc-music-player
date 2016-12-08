@@ -2,10 +2,6 @@ package abc.sound;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Test;
 
 public class MusicTest {
@@ -18,7 +14,7 @@ public class MusicTest {
     private final static Pitch D = new Pitch('D');
     private final static Pitch E = new Pitch('E');
     
-    private final static Note NOTE_1 = new Note(C, 1.0);
+    private final static Note NOTE_1 = new Note(B, 1.0);
     
     private final static Rest REST_1 = new Rest(1);
     
@@ -30,7 +26,7 @@ public class MusicTest {
     ///////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void testNote() {
-        System.out.println(NOTE_1.toString());
+        //System.out.println(NOTE_1.toString());
     }
     
     @Test

@@ -56,7 +56,7 @@ public class Pitch {
     }
     
     private void checkRep() {
-        assert this.value > 0;
+        assert true;
     }
 
     /**
