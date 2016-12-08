@@ -75,7 +75,7 @@ public class MultipleVoices implements Music {
     }
     
     @Override
-    public Music concat(Music music1, Music music2) {
+    public Music concat(Music music2) {
         // TODO Auto-generated method stub
         return null;
     }

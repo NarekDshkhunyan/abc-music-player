@@ -80,10 +80,9 @@ public interface Music {
     
     /**
      * concatenates two pieces of music
-     * @param music1 first piece to be concatenated
      * @param music2 piece to be added to end of music1
-     * @return new Music representing a sequence of music1 and music2
+     * @return new Music representing a sequence of this followed by music2
      */
-    public Music concat(Music music1, Music music2);
+    public Music concat(Music music2);
 
 }
