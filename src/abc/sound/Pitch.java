@@ -52,6 +52,11 @@ public class Pitch {
     
     private Pitch(int value) {
         this.value = value;
+        checkRep();
+    }
+    
+    private void checkRep() {
+        assert true;
     }
 
     /**
@@ -66,7 +71,7 @@ public class Pitch {
             throw new IllegalArgumentException(c + " must be in the range A-G");
         }
     }
-
+    
     /**
      * @return pitch made by transposing this pitch by semitonesUp semitones;
      *         for example, middle C transposed by 12 semitones is high C, and

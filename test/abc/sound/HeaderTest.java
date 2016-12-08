@@ -2,29 +2,19 @@ package abc.sound;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-
-import abc.parser.AbcGrammar;
-import abc.parser.MusicParser;
-import lib6005.parser.GrammarCompiler;
-import lib6005.parser.ParseTree;
-import lib6005.parser.Parser;
-import lib6005.parser.UnableToParseException;
-
 /**
  * This file contains tests for abc.sound.Header and relates to the construction of Header and it's methods.
  * For tests on parsing header information in abc files, look at ParserTests
  *
  */
 public class HeaderTest {
-    
+
     /*
      * Testing strategy:
      *  Since most of the methods are observers, we will use one test to check all observers
@@ -52,7 +42,6 @@ public class HeaderTest {
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////
-    @Test
     public void testObservers() {
         Map<String, List<String>> voices = new HashMap<>();
         voices.put("voice 1", Arrays.asList("C ","D ", "E ", "F ", "|"));
@@ -101,6 +90,7 @@ public class HeaderTest {
     }
     
     @Test
+
     public void testEqualsDifferentHeaders() {
         Map<String, List<String>> voices = new HashMap<>();
         voices.put("", Arrays.asList("C ","D ", "E ", "F ", "|", "A"));
