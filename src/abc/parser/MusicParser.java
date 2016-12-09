@@ -145,29 +145,55 @@ public class MusicParser {
             
             switch (currentChild.getName()) {
             
-                case ROOT:{
-                    break;
-                
-                }
+//                case ROOT:{
+//                    break;
+//                
+//                }
             
                 case MUSIC: {
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        queue.add(child);
+                    }
                     break;
                 }
                 
                 case LINE: {
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        if (child.getName() != MusicGrammar.COMMENT) {
+                            queue.add(child);
+                        }
+                    }
                     break;
                 }
                 
                 // parse element from here on
                 case ELEMENT: {
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        //System.out.println(child);
+                        if (child.getName() == MusicGrammar.NOTEELEMENT || child.getName() == MusicGrammar.TUPLETELEMENT) {
+                            //System.out.println(child);
+                            queue.add(child);
+                        } else if (child.getName() == MusicGrammar.BARLINE) {         // TODO
+                            continue;
+                        } else if (child.getName() == MusicGrammar.NTHREPEAT) {       // TODO
+                            continue;
+                        } else {                                                      // Just a whitespace
+                            continue;
+                        }
+                    }
                     break;
                 }
                 
                 case NOTEELEMENT: {
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        //System.out.println(child);
+                        queue.add(child);
+                    }
                     break;
                 }
                 
                 case NOTE: {
+                    System.out.println(currentChild);
                     break;
                 }
                 
@@ -188,10 +214,17 @@ public class MusicParser {
                 }
                 
                 case MULTINOTE: {
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        //System.out.println(child);
+                        queue.add(child);
+                    }
                     break;
                 }
                 
                 case TUPLETELEMENT: {
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        //System.out.println(child);
+                    }
                     break;
                 }
                 

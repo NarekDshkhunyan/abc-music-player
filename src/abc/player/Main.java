@@ -27,6 +27,8 @@ public class Main {
 
     public static void main(String[] args) {
         Queue<String> arguments = new LinkedList<String>(Arrays.asList(args));
+        //arguments.add("sample_abc/piece1.abc");
+        arguments.add("sample_abc/piece2.abc");
         if (arguments.isEmpty()) {
             throw new RuntimeException("No abc file specified!");
         } else {
