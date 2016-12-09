@@ -1,8 +1,6 @@
 package abc.parser;
 
-public class MusicGrammar {
-    
-    public enum AbcMusicGrammar {
+public enum MusicGrammar {
         ROOT, 
         MUSIC,
         VOICE,
@@ -31,6 +29,4 @@ public class MusicGrammar {
         ALPHABET,
         NEWLINE,
         WHITESPACE
-    }
-
 }

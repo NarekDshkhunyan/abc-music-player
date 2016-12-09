@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import abc.parser.MusicGrammar.AbcMusicGrammar;
 import abc.sound.Header;
 import abc.sound.Music;
 import abc.sound.Pitch;
@@ -128,12 +127,9 @@ public class MusicParser {
      * @param tree the parse tree that is constructed according to the specified abc notation grammar
      * @return a Music that the parse tree represents
      */
-    public static Music buildMusic(ParseTree<AbcMusicGrammar> tree, Header header) {
-        
-        
-        assert tree.getName() == AbcMusicGrammar.MUSIC;
-        
-        Map<List<String>, List<Pitches>> sharpKeySingarutes = MusicParser.sharpKeySignatures;
+    public static Music buildMusic(ParseTree<MusicGrammar> tree, Header header) {
+                
+        Map<List<String>, List<Pitches>> sharpKeySingatures = MusicParser.sharpKeySignatures;
         Map<List<String>, List<Pitches>> flatKeySignatures = MusicParser.flatKeySignatures;
         
         String keySignature = header.getKey(); //Gets key signature of String
@@ -142,9 +138,9 @@ public class MusicParser {
         
         
         // start parsing the tree
-        Queue<ParseTree<AbcMusicGrammar>> queue = new LinkedList<>(tree.children());
+        Queue<ParseTree<MusicGrammar>> queue = new LinkedList<>(tree.children());
         while (queue.size() > 0) {
-            ParseTree<AbcMusicGrammar> currentChild = queue.remove();
+            ParseTree<MusicGrammar> currentChild = queue.remove();
              
             
             switch (currentChild.getName()) {

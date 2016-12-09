@@ -3,9 +3,10 @@ package abc.sound;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 import abc.parser.*;
-import abc.parser.MusicGrammar.AbcMusicGrammar;
 import lib6005.parser.GrammarCompiler;
 import lib6005.parser.ParseTree;
 import lib6005.parser.Parser;
@@ -25,10 +26,6 @@ public interface Music {
      public static final int DEFAULT_TEMPO_BPM = 100;
      
      public static final String DEFAULT_COMPOSER = "Unknown";
-
-                             
-                    
-    // TODO: need to store key signatures in some sort of look up table
                     
     /**
      * parses abc file into Music
@@ -41,17 +38,15 @@ public interface Music {
             ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
             Header header = HeaderParser.buildHeader(headerTree);
             
-            Parser<AbcMusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), AbcMusicGrammar.ROOT);
+            Parser<MusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), MusicGrammar.ROOT);
             
             Music music = new Rest(0);
-            for (String voice: header.getVoices().keySet()){
-                ParseTree<AbcMusicGrammar> musicTree = musicParser.parse((InputStream) header.getVoices().get(voice));
+            Map<String, List<String>> voices = header.getVoices();
+            for (String voice : voices.keySet()) {
+                String voiceLines = String.join("", voices.get(voice));
+                ParseTree<MusicGrammar> musicTree = musicParser.parse(voiceLines);
                 Music musicNew = MusicParser.buildMusic(musicTree, header);
-                if (music == new Rest(0)){
-                    music = musicNew;  
-                }else{
-                    music = new MultipleVoices(musicNew, music);   
-                }    
+                music = new MultipleVoices(musicNew, music);
             }
             return music;
             
