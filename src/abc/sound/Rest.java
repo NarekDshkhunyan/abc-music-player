@@ -41,18 +41,7 @@ public class Rest implements Music {
         // TODO Auto-generated method stub
 
     }
-    
-    @Override
-    public Music addVoice(Music voice) {
-        return null;
-    }
 
-    @Override
-    public Music concat(Music music2) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
     @Override
     public String toString() {
         return "Rest [duration=" + duration + "]";

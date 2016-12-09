@@ -51,11 +51,6 @@ public class Note implements Music {
         //player.addNote(pitch, atBeat, duration);
     }
     
-    @Override
-    public Music addVoice(Music voice) {
-        return null;
-    }
-    
     /**
      * converts the note to a human-readable string of the format:
      *  pitch: pitch
@@ -94,11 +89,5 @@ public class Note implements Music {
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + ((pitch == null) ? 0 : pitch.hashCode());
         return result;
-    }
-
-    @Override
-    public Music concat(Music music2) {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

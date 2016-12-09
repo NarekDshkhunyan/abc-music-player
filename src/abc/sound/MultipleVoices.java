@@ -70,17 +70,6 @@ public class MultipleVoices implements Music {
     }
     
     @Override
-    public Music addVoice(Music voice) {
-        return null;
-    }
-    
-    @Override
-    public Music concat(Music music2) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public String toString() {
         return "Together [m1=" + recentVoice + ", rest=" + rest + "]";
     }

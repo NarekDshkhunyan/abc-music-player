@@ -50,18 +50,6 @@ public class Concat implements Music {
     }
 
     @Override
-    public Music addVoice(Music voice) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Music concat(Music music2) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public String toString() {
         return "Concat [music1=" + music1 + ", music2=" + music2 + "]";
     }

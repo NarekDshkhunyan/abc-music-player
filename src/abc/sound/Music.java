@@ -81,16 +81,22 @@ public interface Music {
     
     /**
      * adds the specified voice to the music to be played simultaneously
+     * @param voices currently existing voices
      * @param voice the voice to add
-     * @return new Music that now includes the extra voice
+     * @return new Music that now includes the extra voice played alongside with voices
      */
-    public Music addVoice(Music voice);
+    public static Music addVoice(Music voices, Music voice) {
+        return new MultipleVoices(voices, voice);
+    }
     
     /**
      * concatenates two pieces of music
+     * @param music1 piece to be concanated with music2
      * @param music2 piece to be added to end of music1
      * @return new Music representing a sequence of this followed by music2
      */
-    public Music concat(Music music2);
+    public static Music concat(Music music1, Music music2) {
+        return new Concat(music1, music2);
+    }
 
 }
