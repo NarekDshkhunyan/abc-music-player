@@ -15,6 +15,9 @@ import lib6005.parser.ParseTree;
 
 public class MusicParser {
     
+    private final Map<List<String>, List<Pitches>> sharpKeySignatures = getSharpKeySignatures();
+    private final Map<List<String>, List<Pitches>> flatKeySignatures = getFlatKeySignatures();
+    
     private enum Pitches{
         SHARPA(new Pitch('A'), 1),
         FLATA(new Pitch('A'), -1),
@@ -61,62 +64,73 @@ public class MusicParser {
     
     
     /**
-     * builds a mapping between list of strings, which correspond to pitches,
-     * and a list of sharp pitches
-     * Mapping between scales with sharp key signatures and affected pitches. ([Major key, Minor key]: [sharp Notes]).
-     * @return sharpKeySignatures signatures of sharp pitches
+     * Builds a mapping between list of strings, which correspond to key signatures,
+     * and a list of sharp pitches.
+     * Mapping between scales with sharp key signatures and affected pitches. ([Major key, Minor key]: [sharp Pitches]).
+     * @return sharpKeySignatures key signatures and their corresponding sharp pitches
      */
-    private static Map<List<String>, List<Pitches>> sharpKeySignatures() {
+    private Map<List<String>, List<Pitches>> getSharpKeySignatures() {
         
-        Map<List<String>, List<Pitches>> sharpKeySignatures = new HashMap<>();
+        Map<List<String>, List<Pitches>> sharpKeySignaturesMapping;
         
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>()); //0 sharps
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("G", "Em")), 
+        if (sharpKeySignatures != null){
+            return sharpKeySignatures;
+        }
+        
+        sharpKeySignaturesMapping = new HashMap<>();
+        
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>()); //0 sharps
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("G", "Em")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF))); //F#
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("D", "Bm")), 
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("D", "Bm")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC))); //F#, C#
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("A", "F#m")), 
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("A", "F#m")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG))); //F#, C#, G#
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("E", "C#m")), 
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("E", "C#m")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD)));  //F#, C#, G#, D#
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("B", "G#m")), 
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("B", "G#m")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD, Pitches.SHARPA)));//F#, C#, G#, D#, A#
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("F#", "D#m")), 
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("F#", "D#m")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD, Pitches.SHARPA, Pitches.SHARPE))); //F#, C#, G#, D#, A#, E#
-        sharpKeySignatures.put(new ArrayList<>(Arrays.asList("C#", "A#m")), 
+        sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C#", "A#m")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD, Pitches.SHARPA, Pitches.SHARPE, Pitches.SHARPB))); //F#, C#, G#, D#, A#, E#, B#
     
-        return sharpKeySignatures;
+        return sharpKeySignaturesMapping;
     
     }
     
     /**
-     * builds a mapping between list of strings, which correspond to pitches,
-     * and a list of flat pitches
+     * Builds a mapping between list of strings, which correspond to key signatures,
+     * and a list of flat pitches.
      * Mapping between scales with flat key signatures and affected pitches. ([Major key, Minor key] : [flat Pitches]).
-     * @return flatKeySignatures signatures of flat pitches
+     * @return flatKeySignatures key signatures and their corresponding flat pitches
      */
-    private static Map<List<String>, List<Pitches>> flatKeySignatures() {
-        Map<List<String>, List<Pitches>> flatKeySignatures = new HashMap<>();
+    private Map<List<String>, List<Pitches>> getFlatKeySignatures() {
         
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>());   //0 flats 
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("F", "Dm")), 
+        Map<List<String>, List<Pitches>> flatKeySignaturesMapping;
+       
+        if (this.flatKeySignatures != null){
+            return this.flatKeySignatures;
+        }
+        flatKeySignaturesMapping = new HashMap<>();
+        
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>());   //0 flats 
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("F", "Dm")), 
                 new ArrayList<>(Arrays.asList(Pitches.FLATB)));   //Bb
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("Bb", "Gm")), 
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Bb", "Gm")), 
                 new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE))); //Bb, Eb
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("Eb", "Cm")), 
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Eb", "Cm")), 
                 new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA))); //Bb, Eb, Ab
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("Ab", "Fm")),
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Ab", "Fm")),
                 new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD))); //Bb, Eb, Ab, Db
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("Db", "Bbm")),
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Db", "Bbm")),
                 new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD, Pitches.FLATG))); //Bb, Eb, Ab, Db, Gb
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("Gb", "Ebm")),
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Gb", "Ebm")),
                 new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD, Pitches.FLATG, Pitches.FLATC))); //Bb, Eb, Ab, Db, Gb, Cb
-        flatKeySignatures.put(new ArrayList<>(Arrays.asList("Cb", "Abm")),
+        flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Cb", "Abm")),
                 new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD, Pitches.FLATG, Pitches.FLATC, Pitches.FLATF))); //Bb, Eb, Ab, Db, Gb, Cb, Fb
           
-    
-    return flatKeySignatures; 
+    return flatKeySignaturesMapping; 
     }
     
     /**
@@ -127,9 +141,6 @@ public class MusicParser {
     public static Music buildMusic(ParseTree<AbcGrammar> tree, Header header) {
         
         assert tree.getName() == AbcGrammar.ROOT;
-        
-        Map<List<String>, List<Pitches>> sharpSingatures = sharpKeySignatures();
-        Map<List<String>, List<Pitches>> flatSignatures = flatKeySignatures();
         
         String keySignature = header.getKey(); //Gets key signature of String
         
