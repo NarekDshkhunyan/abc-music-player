@@ -8,6 +8,7 @@ root ::= header music;
 
 
 @skip WHITESPACE{
+
 	header ::= number comment* title others* keyfield;
 	
 	number ::= "X:" DIGIT+ eol;

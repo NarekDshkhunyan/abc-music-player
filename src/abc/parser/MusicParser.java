@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import abc.parser.MusicGrammar.AbcMusicGrammar;
 import abc.sound.Header;
 import abc.sound.Music;
 import abc.sound.Pitch;
@@ -15,8 +16,8 @@ import lib6005.parser.ParseTree;
 
 public class MusicParser {
     
-    private final Map<List<String>, List<Pitches>> sharpKeySignatures = getSharpKeySignatures();
-    private final Map<List<String>, List<Pitches>> flatKeySignatures = getFlatKeySignatures();
+    private static Map<List<String>, List<Pitches>> sharpKeySignatures = getSharpKeySignatures();
+    private static Map<List<String>, List<Pitches>> flatKeySignatures = getFlatKeySignatures();
     
     private enum Pitches{
         SHARPA(new Pitch('A'), 1),
@@ -69,16 +70,10 @@ public class MusicParser {
      * Mapping between scales with sharp key signatures and affected pitches. ([Major key, Minor key]: [sharp Pitches]).
      * @return sharpKeySignatures key signatures and their corresponding sharp pitches
      */
-    private Map<List<String>, List<Pitches>> getSharpKeySignatures() {
+    private static Map<List<String>, List<Pitches>> getSharpKeySignatures() {
         
-        Map<List<String>, List<Pitches>> sharpKeySignaturesMapping;
-        
-        if (sharpKeySignatures != null){
-            return sharpKeySignatures;
-        }
-        
-        sharpKeySignaturesMapping = new HashMap<>();
-        
+        Map<List<String>, List<Pitches>> sharpKeySignaturesMapping = new HashMap<>();
+      
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>()); //0 sharps
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("G", "Em")), 
                 new ArrayList<>(Arrays.asList(Pitches.SHARPF))); //F#
@@ -105,14 +100,9 @@ public class MusicParser {
      * Mapping between scales with flat key signatures and affected pitches. ([Major key, Minor key] : [flat Pitches]).
      * @return flatKeySignatures key signatures and their corresponding flat pitches
      */
-    private Map<List<String>, List<Pitches>> getFlatKeySignatures() {
+    private static Map<List<String>, List<Pitches>> getFlatKeySignatures() {
         
-        Map<List<String>, List<Pitches>> flatKeySignaturesMapping;
-       
-        if (this.flatKeySignatures != null){
-            return this.flatKeySignatures;
-        }
-        flatKeySignaturesMapping = new HashMap<>();
+        Map<List<String>, List<Pitches>> flatKeySignaturesMapping = new HashMap<>();
         
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>());   //0 flats 
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("F", "Dm")), 
@@ -135,21 +125,34 @@ public class MusicParser {
     
     /**
      * builds an abstract syntax tree of a piece of Music from a ParseTree
-     * @param tree the parse tree that is constructed according to the specified abc ntoation grammar
+     * @param tree the parse tree that is constructed according to the specified abc notation grammar
      * @return a Music that the parse tree represents
      */
-    public static Music buildMusic(ParseTree<AbcGrammar> tree, Header header) {
+    public static Music buildMusic(ParseTree<AbcMusicGrammar> tree, Header header) {
         
-        assert tree.getName() == AbcGrammar.ROOT;
+        
+        assert tree.getName() == AbcMusicGrammar.MUSIC;
+        
+        Map<List<String>, List<Pitches>> sharpKeySingarutes = MusicParser.sharpKeySignatures;
+        Map<List<String>, List<Pitches>> flatKeySignatures = MusicParser.flatKeySignatures;
         
         String keySignature = header.getKey(); //Gets key signature of String
         
+        Map<String, List<String>> voices = header.getVoices();
+        
+        
         // start parsing the tree
-        Queue<ParseTree<AbcGrammar>> queue = new LinkedList<>(tree.children());
+        Queue<ParseTree<AbcMusicGrammar>> queue = new LinkedList<>(tree.children());
         while (queue.size() > 0) {
-            ParseTree<AbcGrammar> currentChild = queue.remove();
+            ParseTree<AbcMusicGrammar> currentChild = queue.remove();
+             
             
             switch (currentChild.getName()) {
+            
+                case ROOT:{
+                    break;
+                
+                }
             
                 case MUSIC: {
                     break;

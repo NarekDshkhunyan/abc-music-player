@@ -2,9 +2,10 @@ package abc.sound;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.io.InputStream;
 
 import abc.parser.*;
+import abc.parser.MusicGrammar.AbcMusicGrammar;
 import lib6005.parser.GrammarCompiler;
 import lib6005.parser.ParseTree;
 import lib6005.parser.Parser;
@@ -39,12 +40,20 @@ public interface Music {
             Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
             ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
             Header header = HeaderParser.buildHeader(headerTree);
-            System.out.println(header);
             
-            Parser<AbcGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), AbcGrammar.ROOT);
-            ParseTree<AbcGrammar> musicTree = musicParser.parse(musicFile);
-            Music music = MusicParser.buildMusic(musicTree, header);
-            throw new RuntimeException("continue implementation");
+            Parser<AbcMusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), AbcMusicGrammar.ROOT);
+            
+            Music music = new Rest(0);
+            for (String voice: header.getVoices().keySet()){
+                ParseTree<AbcMusicGrammar> musicTree = musicParser.parse((InputStream) header.getVoices().get(voice));
+                Music musicNew = MusicParser.buildMusic(musicTree, header);
+                if (music == new Rest(0)){
+                    music = musicNew;  
+                }else{
+                    music = new MultipleVoices(musicNew, music);   
+                }    
+            }
+            return music;
             
         } catch (UnableToParseException ex) {
             throw new IllegalArgumentException("input argument is invalid, could not be parsed: ", ex);
