@@ -206,7 +206,7 @@ public class MusicParser {
                 
                 // TODO: Do we need this?
                 case PITCH: {
-                    System.out.println(currentChild);
+                    //System.out.println(currentChild);
                     
                     // Create a pitch first
                     Pitch pitch = null;
@@ -214,7 +214,7 @@ public class MusicParser {
                     if ( Character.isUpperCase(basenote)) {
                         pitch = new Pitch(basenote);                            // so if char is 'C', make pitch C 
                     } else {
-                        pitch = new Pitch(Character.toUpperCase(basenote));
+                        pitch = new Pitch(Character.toUpperCase(basenote));     // TODO something is wrong here, for example g is printed as G'
                         pitch = pitch.transpose(12);                            // so if char is 'c', make pitch c
                     }
                     
@@ -241,7 +241,7 @@ public class MusicParser {
                         pitch = pitch.transpose(semitoneChange);
                     }
                     
-                    System.out.println("Contructed pitch: " + pitch.toString());
+                    //System.out.println("Contructed pitch: " + pitch.toString());
                     break;
                 }
 
@@ -255,6 +255,7 @@ public class MusicParser {
                         }
                     }
                     if (!repeatBlock) {
+                        System.out.println(multinote);
                         music = Music.concat(music, multinote);
                     } else {
                         if (afterFirstEndingBeforeSecondEnding) {
@@ -364,13 +365,13 @@ public class MusicParser {
                         }
                     }
                 }
-                
+
                 default: {
                     break;
                 }
             }    
         }
-        
+        majorSections.add(music);
         Music finalMusic = new Rest(0);
         for (Music majorSection : majorSections) {
             finalMusic = Music.concat(finalMusic, majorSection);
@@ -380,13 +381,18 @@ public class MusicParser {
     
     private static Music parseNoteOrRest(ParseTree<MusicGrammar> note) {
         ParseTree<MusicGrammar> noteOrRest = note.childrenByName(MusicGrammar.NOTEORREST).get(0);
+        System.out.println(noteOrRest);
         List<ParseTree<MusicGrammar>> pitches = noteOrRest.childrenByName(MusicGrammar.PITCH);
         List<ParseTree<MusicGrammar>> rests = noteOrRest.childrenByName(MusicGrammar.REST);
          
         // Get the multiplier for the note's duration
+        // Weird bug here
+
         List<ParseTree<MusicGrammar>> noteLengths = note.childrenByName(MusicGrammar.NOTELENGTH);
+        System.out.println(noteLengths);
         double noteLengthMultiplier = 1.0;
-        if (noteLengths.size() != 0) {
+        /*
+        if (!noteLengths.isEmpty()) {
            ParseTree<MusicGrammar> noteLength = noteLengths.get(0);
            List<ParseTree<MusicGrammar>> numerators = noteLength.childrenByName(MusicGrammar.NUMERATOR);
            if (numerators.size() > 0) {
@@ -407,7 +413,7 @@ public class MusicParser {
                noteLengthMultiplier = noteLengthMultiplier/divisor;
            }           
         }
-        
+        */
         if (rests.size() > 0) {
             return new Rest(Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
         } else {
@@ -428,7 +434,10 @@ public class MusicParser {
             if (accidentals.size() > 0) {
                 String accidental = accidentals.get(0).getContents();
             }
-            return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
+            Music returnNote = new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
+            System.out.println(returnNote);
+            return returnNote;
+            //return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
         }
     }    
 }
