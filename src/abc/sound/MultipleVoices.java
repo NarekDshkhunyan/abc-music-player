@@ -54,7 +54,7 @@ public class MultipleVoices implements Music {
     @Override
     public double duration() {
         // TODO Auto-generated method stub
-        return 0;
+        return Double.max(recentVoice.duration(), rest.duration());
     }
 
     @Override
@@ -66,7 +66,8 @@ public class MultipleVoices implements Music {
     @Override
     public void play(SequencePlayer player, double atBeat) {
         // TODO Auto-generated method stub
-
+        recentVoice.play(player, atBeat);
+        rest.play(player, atBeat);
     }
     
     @Override

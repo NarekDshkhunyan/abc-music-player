@@ -3,6 +3,7 @@ package abc.sound;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ public interface Music {
      public static final int DEFAULT_TEMPO_BPM = 100;
      
      public static final String DEFAULT_COMPOSER = "Unknown";
+     
+     public static final int DEFAULT_DURATION_OF_DEFAULT_NOTE = 192;
                     
     /**
      * parses abc file into Music
@@ -41,9 +44,14 @@ public interface Music {
             Parser<MusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), MusicGrammar.ROOT);
             
             Music music = new Rest(0);
-            Map<String, List<String>> voices = header.getVoices();
-            for (String voice : voices.keySet()) {
-                String voiceLines = String.join("", voices.get(voice));
+            Map<String, List<String>> voicesMap = header.getVoices();
+            List<String> voicesLines = new ArrayList<>();
+            for (List<String> lines : voicesMap.values()) {
+                if (!lines.isEmpty()) {
+                    voicesLines.add(String.join("", lines));
+                }
+            }
+            for (String voiceLines : voicesLines) {
                 ParseTree<MusicGrammar> musicTree = musicParser.parse(voiceLines);
                 Music musicNew = MusicParser.buildMusic(musicTree, header);
                 music = new MultipleVoices(musicNew, music);

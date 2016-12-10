@@ -38,8 +38,7 @@ public class Rest implements Music {
 
     @Override
     public void play(SequencePlayer player, double atBeat) {
-        // TODO Auto-generated method stub
-
+        return;
     }
 
     @Override

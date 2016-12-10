@@ -45,8 +45,8 @@ public class Concat implements Music {
 
     @Override
     public void play(SequencePlayer player, double atBeat) {
-        // TODO Auto-generated method stub
-
+        music1.play(player, atBeat);
+        music2.play(player, atBeat + music1.duration());
     }
 
     @Override

@@ -26,6 +26,9 @@ public enum MusicGrammar {
         EOL,
         TEXT,
         DIGIT,
+        NUMERATOR,
+        DENOMINATOR,
+        DIVISION,
         ALPHABET,
         NEWLINE,
         WHITESPACE

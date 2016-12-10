@@ -19,7 +19,7 @@ note ::= noteorrest notelength?;
 noteorrest ::= pitch | rest;
 pitch ::= accidental? basenote octave?;
 octave ::= "'"+ | ","+;
-notelength ::= (DIGIT+)? ("/" (DIGIT+)?)?;
+notelength ::= numerator? division?;
 notelengthstrict ::= DIGIT+ "/" DIGIT+;
 
 // "^" is sharp, "_" is flat, and "=" is neutral
@@ -51,6 +51,9 @@ eol ::= comment | NEWLINE;
 text ::= WHITESPACE* (DIGIT | ALPHABET | '.')+ (WHITESPACE | DIGIT | ALPHABET | '.')*;
 
 DIGIT ::= [0-9];
+numerator ::= DIGIT+;
+denominator ::= DIGIT+;
+division ::= "/" denominator?;
 ALPHABET ::= [a-zA-Z];
 NEWLINE ::= "\n" | "\r" "\n"?;
 WHITESPACE ::= " " | "\t";

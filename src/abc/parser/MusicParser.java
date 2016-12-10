@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import abc.sound.Header;
-import abc.sound.Music;
-import abc.sound.Pitch;
+import abc.sound.*;
 import lib6005.parser.ParseTree;
 
 public class MusicParser {
+    
+    // TODO: We have to incorporate accidentals into note creation (using key signatures and any in piece changes)
+    // TODO: incorporate length changes for tuplets
     
     private static Map<List<String>, List<Pitches>> sharpKeySignatures = getSharpKeySignatures();
     private static Map<List<String>, List<Pitches>> flatKeySignatures = getFlatKeySignatures();
@@ -128,28 +129,31 @@ public class MusicParser {
      * @return a Music that the parse tree represents
      */
     public static Music buildMusic(ParseTree<MusicGrammar> tree, Header header) {
-                
+                        
         Map<List<String>, List<Pitches>> sharpKeySingatures = MusicParser.sharpKeySignatures;
         Map<List<String>, List<Pitches>> flatKeySignatures = MusicParser.flatKeySignatures;
         
         String keySignature = header.getKey(); //Gets key signature of String
-        
-        Map<String, List<String>> voices = header.getVoices();
-        
+        String meter = header.getMeter();
+        String length = header.getLength();
+        String baseNote = header.getTempoBaseNote();
+        int bpm = header.getTempoBPM();
+        boolean repeatBlock = false;
+        boolean afterFirstEndingBeforeSecondEnding = false;
+        boolean pastSecondEndingBeforeEndRepeat = false;
+                
+        List<Music> majorSections = new ArrayList<>();
+        Music music = new Rest(0); // current major section music
+        Music firstEnding = new Rest(0);
+        Music secondEnding = new Rest(0);
+
         
         // start parsing the tree
         Queue<ParseTree<MusicGrammar>> queue = new LinkedList<>(tree.children());
         while (queue.size() > 0) {
-            ParseTree<MusicGrammar> currentChild = queue.remove();
-             
+            ParseTree<MusicGrammar> currentChild = queue.remove();  
             
             switch (currentChild.getName()) {
-            
-//                case ROOT:{
-//                    break;
-//                
-//                }
-            
                 case MUSIC: {
                     for (ParseTree<MusicGrammar> child : currentChild) {
                         queue.add(child);
@@ -159,7 +163,7 @@ public class MusicParser {
                 
                 case LINE: {
                     for (ParseTree<MusicGrammar> child : currentChild) {
-                        if (child.getName() != MusicGrammar.COMMENT) {
+                        if (child.getName() != MusicGrammar.COMMENT || child.getName() != MusicGrammar.NEWLINE) {
                             queue.add(child);
                         }
                     }
@@ -170,54 +174,37 @@ public class MusicParser {
                 case ELEMENT: {
                     for (ParseTree<MusicGrammar> child : currentChild) {
                         //System.out.println(child);
-                        if (child.getName() == MusicGrammar.NOTEELEMENT || child.getName() == MusicGrammar.TUPLETELEMENT) {
-                            //System.out.println(child);
+                        if (child.getName() != MusicGrammar.WHITESPACE) {
                             queue.add(child);
-                        } else if (child.getName() == MusicGrammar.BARLINE) {         // TODO
-                            continue;
-                        } else if (child.getName() == MusicGrammar.NTHREPEAT) {       // TODO
-                            continue;
-                        } else {                                                      // Just a whitespace
-                            continue;
                         }
                     }
                     break;
                 }
                 
                 case NOTEELEMENT: {
-                    for (ParseTree<MusicGrammar> child : currentChild) {
-                        //System.out.println(child);
-                        queue.add(child);
-                    }
+                    ParseTree<MusicGrammar> child = currentChild.children().get(0);
+                    queue.add(child);
                     break;
                 }
                 
                 case NOTE: {
-                    //System.out.println(currentChild);
-                    for (ParseTree<MusicGrammar> child : currentChild) {
-                        if (child.getName() == MusicGrammar.NOTEORREST) {
-                            queue.add(child);
-                        } else {                            // TODO notelength
-                            continue;
+                    Music noteToAdd = parseNoteOrRest(currentChild);
+                    if (!repeatBlock) {
+                        music = Music.concat(music, noteToAdd);                        
+                    } else {
+                        if (afterFirstEndingBeforeSecondEnding) {
+                            firstEnding = Music.concat(firstEnding, noteToAdd);
+                        } else if (pastSecondEndingBeforeEndRepeat) {
+                            secondEnding = Music.concat(secondEnding, noteToAdd);
+                        } else {
+                            firstEnding = Music.concat(firstEnding, noteToAdd);
+                            secondEnding = Music.concat(secondEnding, noteToAdd);
                         }
                     }
                     break;
                 }
                 
-                case NOTEORREST: {
-                    //System.out.println(currentChild.getName());
-                    for (ParseTree<MusicGrammar> child : currentChild) {
-                        if (child.getName() == MusicGrammar.PITCH) {
-                            //System.out.println("Pitch: " + child);
-                            queue.add(child);
-                        } else if (child.getName() == MusicGrammar.REST) {
-                            //System.out.println("Rest" + child);
-                            queue.add(child);
-                        }
-                    }
-                    break;
-                }
-                
+                // TODO: Do we need this?
                 case PITCH: {
                     System.out.println(currentChild);
                     
@@ -257,46 +244,191 @@ public class MusicParser {
                     System.out.println("Contructed pitch: " + pitch.toString());
                     break;
                 }
-                
-                case REST: {
-                    break;
-                }
-                
-                case NOTELENGTH: {
-                    break;
-                }
-                
+
                 case MULTINOTE: {
-                    for (ParseTree<MusicGrammar> child : currentChild) {
-                        //System.out.println(child);
-                        queue.add(child);
+                    Music multinote = null;
+                    for (ParseTree<MusicGrammar> child : currentChild.childrenByName(MusicGrammar.NOTE)) {
+                        if (multinote == null) {
+                            multinote = parseNoteOrRest(child);
+                        } else {
+                            multinote = Music.addVoice(parseNoteOrRest(child), multinote);
+                        }
+                    }
+                    if (!repeatBlock) {
+                        music = Music.concat(music, multinote);
+                    } else {
+                        if (afterFirstEndingBeforeSecondEnding) {
+                            firstEnding = Music.concat(firstEnding, multinote);
+                        } else if (pastSecondEndingBeforeEndRepeat) {
+                            secondEnding = Music.concat(secondEnding, multinote);
+                        } else {
+                            firstEnding = Music.concat(firstEnding, multinote);
+                            secondEnding = Music.concat(secondEnding, multinote);
+                        }
                     }
                     break;
                 }
                 
                 case TUPLETELEMENT: {
-                    for (ParseTree<MusicGrammar> child : currentChild) {
-                        //System.out.println(child);
+                    ParseTree<MusicGrammar> specTree = currentChild.childrenByName(MusicGrammar.TUPLETSPEC).get(0);
+                    String spec = specTree.childrenByName(MusicGrammar.DIGIT).get(0).getContents();
+                    double noteLengthMultiplier = 1.0;
+                    if (spec.equals("2")) {
+                        noteLengthMultiplier = 3.0/2.0;
+                    } else if (spec.equals("3")) {
+                        noteLengthMultiplier = 2.0/3.0;
+                    } else {
+                        noteLengthMultiplier = 3.0/4.0;                        
+                    }
+                    // TODO: Incorporate multiplier
+                    Music tuplet = null;
+                    for (ParseTree<MusicGrammar> child : currentChild.childrenByName(MusicGrammar.NOTEELEMENT)) {
+                        Music nextElement = null;
+                        if (child.getName() == MusicGrammar.NOTE) {
+                            nextElement = parseNoteOrRest(child);                            
+                        } else {
+                            for (ParseTree<MusicGrammar> multinoteChild : child.childrenByName(MusicGrammar.NOTE)) {
+                                if (nextElement == null) {
+                                     nextElement = parseNoteOrRest(multinoteChild);
+                                } else {
+                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild), nextElement);
+                                }
+                            }                            
+                        }
+                        if (tuplet == null) {
+                            tuplet = nextElement;
+                        } else {
+                            tuplet = Music.concat(tuplet, nextElement);
+                        }
+                    }
+                    
+                    if (!repeatBlock) {
+                        music = Music.concat(music, tuplet);
+                    } else {
+                        if (afterFirstEndingBeforeSecondEnding) {
+                            firstEnding = Music.concat(firstEnding, tuplet);
+                        } else if (pastSecondEndingBeforeEndRepeat) {
+                            secondEnding = Music.concat(secondEnding, tuplet);
+                        } else {
+                            firstEnding = Music.concat(firstEnding, tuplet);
+                            secondEnding = Music.concat(secondEnding, tuplet);
+                        }
                     }
                     break;
                 }
                 
-                // parse midtune field from here on
-                case MIDTUNEFIELD: {
+                case BARLINE: {
+                    String bar = currentChild.getContents();
+                    
+                    if (bar.equals("|]")) {
+                        majorSections.add(music);
+                        music = new Rest(0);
+                    } else if (bar.equals("[:")) {
+                        repeatBlock = true;
+                        firstEnding = new Rest(0);
+                        secondEnding = new Rest(0);
+                    } else if (bar.equals(":]")) {
+                        if (!repeatBlock) {
+                            // this means that we started parsing at a major section and so entire section has to be repeated
+                            music = Music.concat(music, music);
+                        } else {
+                            // this means we were inside a repeat block: first concatenate the two endings
+                            Music repeatBlockMusic = Music.concat(firstEnding, secondEnding);
+                            // now append repeatBlock to rest of the major block
+                            music = Music.concat(music, repeatBlockMusic);
+                            // this means that we were inside a repeat block so we are first concatenating repeatBlock and then adding
+                            // to the end of rest of major section music
+                            music = Music.concat(music, Music.concat(repeatBlockMusic, repeatBlockMusic));
+                        }
+                        repeatBlock = false;
+                        pastSecondEndingBeforeEndRepeat = false;
+                    }
+                    // TODO: Figure out what to do with regular bar lines that denote resets in any alterations to key signature
                     break;
                 }
                 
-                case VOICE: {
-                    break;
+                case NTHREPEAT: {
+                    String nthRepeat = currentChild.getContents();
+                    
+                    if (nthRepeat.equals("[1")) {
+                        afterFirstEndingBeforeSecondEnding = true;
+                        if (!repeatBlock) {
+                            firstEnding = Music.concat(music, firstEnding);
+                            secondEnding = Music.concat(music, secondEnding);
+                            repeatBlock = true;
+                        }
+                    } else {
+                        afterFirstEndingBeforeSecondEnding = false;
+                        if (repeatBlock) {
+                            pastSecondEndingBeforeEndRepeat = true;
+                        }
+                    }
                 }
                 
                 default: {
                     break;
                 }
             }    
-    }
+        }
         
-    return null;
+        Music finalMusic = new Rest(0);
+        for (Music majorSection : majorSections) {
+            finalMusic = Music.concat(finalMusic, majorSection);
+        }
+        return finalMusic;
     }
     
+    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note) {
+        ParseTree<MusicGrammar> noteOrRest = note.childrenByName(MusicGrammar.NOTEORREST).get(0);
+        List<ParseTree<MusicGrammar>> pitches = noteOrRest.childrenByName(MusicGrammar.PITCH);
+        List<ParseTree<MusicGrammar>> rests = noteOrRest.childrenByName(MusicGrammar.REST);
+         
+        // Get the multiplier for the note's duration
+        List<ParseTree<MusicGrammar>> noteLengths = note.childrenByName(MusicGrammar.NOTELENGTH);
+        double noteLengthMultiplier = 1.0;
+        if (noteLengths.size() != 0) {
+           ParseTree<MusicGrammar> noteLength = noteLengths.get(0);
+           List<ParseTree<MusicGrammar>> numerators = noteLength.childrenByName(MusicGrammar.NUMERATOR);
+           if (numerators.size() > 0) {
+               String numerator = numerators.get(0).getContents();
+               noteLengthMultiplier = noteLengthMultiplier * Double.parseDouble(numerator);
+           }
+           List<ParseTree<MusicGrammar>> divisions = noteLength.childrenByName(MusicGrammar.DIVISION);
+           if (divisions.size() > 0) {
+               double divisor = 1.0;
+               ParseTree<MusicGrammar> division = divisions.get(0);
+               List<ParseTree<MusicGrammar>> denominators = division.childrenByName(MusicGrammar.DENOMINATOR);
+               if (denominators.size() > 0) {
+                   String denominator = denominators.get(0).getContents();
+                   divisor = Integer.parseInt(denominator);
+               } else {
+                   divisor = 2.0;
+               }
+               noteLengthMultiplier = noteLengthMultiplier/divisor;
+           }           
+        }
+        
+        if (rests.size() > 0) {
+            return new Rest(Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
+        } else {
+            ParseTree<MusicGrammar> pitchTree = pitches.get(0);
+            char baseNote = pitchTree.childrenByName(MusicGrammar.BASENOTE).get(0).getContents().charAt(0);
+            List<ParseTree<MusicGrammar>> accidentals = pitchTree.childrenByName(MusicGrammar.ACCIDENTAL);
+            List<ParseTree<MusicGrammar>> octaves = pitchTree.childrenByName(MusicGrammar.OCTAVE);
+            int semitonesUp = 0;
+            if (octaves.size() > 0) {
+                String octave = octaves.get(0).getContents();
+                semitonesUp = octave.length();
+            }
+            semitonesUp = (Character.isLowerCase(baseNote)) ? semitonesUp + 1 : semitonesUp;
+            Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp);
+
+            // TODO: Handle accidentals. 
+            // Specifically, we need to be able to keep track of modified accidentals throughout a bar and key signatures
+            if (accidentals.size() > 0) {
+                String accidental = accidentals.get(0).getContents();
+            }
+            return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
+        }
+    }    
 }

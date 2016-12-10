@@ -48,7 +48,7 @@ public class Note implements Music {
 
     @Override
     public void play(SequencePlayer player, double atBeat) {
-        //player.addNote(pitch, atBeat, duration);
+        player.addNote(pitch.toMidiNote(), (int) atBeat, (int) duration);
     }
     
     /**
