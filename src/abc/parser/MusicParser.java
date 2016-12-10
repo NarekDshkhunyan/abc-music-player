@@ -193,15 +193,68 @@ public class MusicParser {
                 }
                 
                 case NOTE: {
-                    System.out.println(currentChild);
+                    //System.out.println(currentChild);
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        if (child.getName() == MusicGrammar.NOTEORREST) {
+                            queue.add(child);
+                        } else {                            // TODO notelength
+                            continue;
+                        }
+                    }
                     break;
                 }
                 
                 case NOTEORREST: {
+                    //System.out.println(currentChild.getName());
+                    for (ParseTree<MusicGrammar> child : currentChild) {
+                        if (child.getName() == MusicGrammar.PITCH) {
+                            //System.out.println("Pitch: " + child);
+                            queue.add(child);
+                        } else if (child.getName() == MusicGrammar.REST) {
+                            //System.out.println("Rest" + child);
+                            queue.add(child);
+                        }
+                    }
                     break;
                 }
                 
                 case PITCH: {
+                    System.out.println(currentChild);
+                    
+                    // Create a pitch first
+                    Pitch pitch = null;
+                    char basenote  = currentChild.childrenByName(MusicGrammar.BASENOTE).get(0).getContents().charAt(0);
+                    if ( Character.isUpperCase(basenote)) {
+                        pitch = new Pitch(basenote);                            // so if char is 'C', make pitch C 
+                    } else {
+                        pitch = new Pitch(Character.toUpperCase(basenote));
+                        pitch = pitch.transpose(12);                            // so if char is 'c', make pitch c
+                    }
+                    
+                    // Then take care of accidentals
+                    if ( !currentChild.childrenByName(MusicGrammar.ACCIDENTAL).isEmpty()) {
+                        String accidental  = currentChild.childrenByName(MusicGrammar.ACCIDENTAL).get(0).getContents();
+                        if (accidental.equals("^")) {
+                            pitch = pitch.transpose(1);
+                        } else if (accidental.equals("^^")) {
+                            pitch = pitch.transpose(2);
+                        } else if (accidental.equals("_")) {
+                            pitch = pitch.transpose(-1);
+                        } else if (accidental.equals("__")) {
+                            pitch = pitch.transpose(-2);
+                        } else {                                    // neutral
+                            continue;
+                        }
+                    }
+                    
+                    // Then take care of octaves
+                    if ( !currentChild.childrenByName(MusicGrammar.OCTAVE).isEmpty()) {
+                        String octave  = currentChild.childrenByName(MusicGrammar.OCTAVE).get(0).getContents();      
+                        int semitoneChange = octave.charAt(0) == ',' ? -12*octave.length() : 12*octave.length();
+                        pitch = pitch.transpose(semitoneChange);
+                    }
+                    
+                    System.out.println("Contructed pitch: " + pitch.toString());
                     break;
                 }
                 
