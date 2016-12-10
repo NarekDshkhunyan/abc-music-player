@@ -255,7 +255,6 @@ public class MusicParser {
                         }
                     }
                     if (!repeatBlock) {
-                        System.out.println(multinote);
                         music = Music.concat(music, multinote);
                     } else {
                         if (afterFirstEndingBeforeSecondEnding) {
@@ -381,7 +380,6 @@ public class MusicParser {
     
     private static Music parseNoteOrRest(ParseTree<MusicGrammar> note) {
         ParseTree<MusicGrammar> noteOrRest = note.childrenByName(MusicGrammar.NOTEORREST).get(0);
-        System.out.println(noteOrRest);
         List<ParseTree<MusicGrammar>> pitches = noteOrRest.childrenByName(MusicGrammar.PITCH);
         List<ParseTree<MusicGrammar>> rests = noteOrRest.childrenByName(MusicGrammar.REST);
          
@@ -389,9 +387,8 @@ public class MusicParser {
         // Weird bug here
 
         List<ParseTree<MusicGrammar>> noteLengths = note.childrenByName(MusicGrammar.NOTELENGTH);
-        System.out.println(noteLengths);
         double noteLengthMultiplier = 1.0;
-        /*
+
         if (!noteLengths.isEmpty()) {
            ParseTree<MusicGrammar> noteLength = noteLengths.get(0);
            List<ParseTree<MusicGrammar>> numerators = noteLength.childrenByName(MusicGrammar.NUMERATOR);
@@ -413,7 +410,7 @@ public class MusicParser {
                noteLengthMultiplier = noteLengthMultiplier/divisor;
            }           
         }
-        */
+
         if (rests.size() > 0) {
             return new Rest(Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
         } else {
@@ -428,16 +425,14 @@ public class MusicParser {
             }
             semitonesUp = (Character.isLowerCase(baseNote)) ? semitonesUp + 1 : semitonesUp;
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp);
+            
 
             // TODO: Handle accidentals. 
             // Specifically, we need to be able to keep track of modified accidentals throughout a bar and key signatures
             if (accidentals.size() > 0) {
                 String accidental = accidentals.get(0).getContents();
             }
-            Music returnNote = new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
-            System.out.println(returnNote);
-            return returnNote;
-            //return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
+            return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
         }
     }    
 }
