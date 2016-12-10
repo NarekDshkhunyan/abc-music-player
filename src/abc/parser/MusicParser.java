@@ -10,7 +10,7 @@ import java.util.Queue;
 
 import abc.sound.Header;
 import abc.sound.Music;
-import abc.sound.Pitch;
+import abc.sound.*;
 import lib6005.parser.ParseTree;
 
 public class MusicParser {
@@ -197,8 +197,16 @@ public class MusicParser {
                     for (ParseTree<MusicGrammar> child : currentChild) {
                         if (child.getName() == MusicGrammar.NOTEORREST) {
                             queue.add(child);
-                        } else {                            // TODO notelength
-                            continue;
+                        } else {                            // TODO notelength LCD calculations
+                            if (child.getContents().length() == 0) {
+                                double notelength = 0;    //  just a placeholder for now          
+                            } else {
+                                String[] ratio = child.getContents().split("/");
+                                double notelength = (ratio[0].isEmpty()) ? 1.0/Integer.parseInt(ratio[1])   // if it's /2 do 1/2, if it's 3/2 keep that way
+                                                                         : Double.parseDouble(ratio[0])/Double.parseDouble(ratio[1]);
+                                //System.out.println(notelength);
+                                //System.out.println(child.getContents());
+                            }
                         }
                     }
                     break;
@@ -211,7 +219,7 @@ public class MusicParser {
                             //System.out.println("Pitch: " + child);
                             queue.add(child);
                         } else if (child.getName() == MusicGrammar.REST) {
-                            //System.out.println("Rest" + child);
+                            //System.out.println("Rest: " + child);
                             queue.add(child);
                         }
                     }
@@ -219,7 +227,7 @@ public class MusicParser {
                 }
                 
                 case PITCH: {
-                    System.out.println(currentChild);
+                    //System.out.println(currentChild);
                     
                     // Create a pitch first
                     Pitch pitch = null;
@@ -227,7 +235,7 @@ public class MusicParser {
                     if ( Character.isUpperCase(basenote)) {
                         pitch = new Pitch(basenote);                            // so if char is 'C', make pitch C 
                     } else {
-                        pitch = new Pitch(Character.toUpperCase(basenote));
+                        pitch = new Pitch(Character.toUpperCase(basenote));     // TODO something is wrong here, for example g is printed as G'
                         pitch = pitch.transpose(12);                            // so if char is 'c', make pitch c
                     }
                     
@@ -254,11 +262,13 @@ public class MusicParser {
                         pitch = pitch.transpose(semitoneChange);
                     }
                     
-                    System.out.println("Contructed pitch: " + pitch.toString());
+                    //System.out.println("Contructed pitch: " + pitch.toString());
                     break;
                 }
                 
                 case REST: {
+                    double duration = 1.0;                  // TODO Did we ever figure out if this stays float or int?
+                    Rest rest = new Rest(duration);
                     break;
                 }
                 
@@ -282,13 +292,13 @@ public class MusicParser {
                 }
                 
                 // parse midtune field from here on
-                case MIDTUNEFIELD: {
-                    break;
-                }
+//                case MIDTUNEFIELD: {
+//                    break;
+//                }
                 
-                case VOICE: {
-                    break;
-                }
+//                case VOICE: {
+//                    break;
+//                }
                 
                 default: {
                     break;
