@@ -151,7 +151,6 @@ public class MusicParser {
                 // parse element from here on
                 case ELEMENT: {
                     for (ParseTree<MusicGrammar> child : currentChild) {
-                        //System.out.println(child);
                         if (child.getName() != MusicGrammar.WHITESPACE) {
                             queue.add(child);
                         }
@@ -254,11 +253,11 @@ public class MusicParser {
                     if (bar.equals("|]")) {
                         majorSections.add(music);
                         music = new Rest(0);
-                    } else if (bar.equals("[:")) {
+                    } else if (bar.equals("|:")) {
                         repeatBlock = true;
                         firstEnding = new Rest(0);
                         secondEnding = new Rest(0);
-                    } else if (bar.equals(":]")) {
+                    } else if (bar.equals(":|")) {
                         if (!repeatBlock) {
                             // this means that we started parsing at a major section and so entire section has to be repeated
                             music = Music.concat(music, music);
@@ -267,9 +266,8 @@ public class MusicParser {
                             Music repeatBlockMusic = Music.concat(firstEnding, secondEnding);
                             // now append repeatBlock to rest of the major block
                             music = Music.concat(music, repeatBlockMusic);
-                            // this means that we were inside a repeat block so we are first concatenating repeatBlock and then adding
-                            // to the end of rest of major section music
-                            music = Music.concat(music, Music.concat(repeatBlockMusic, repeatBlockMusic));
+                            firstEnding = new Rest(0);
+                            secondEnding = new Rest(0);
                         }
                         repeatBlock = false;
                         pastSecondEndingBeforeEndRepeat = false;
@@ -286,6 +284,7 @@ public class MusicParser {
                         if (!repeatBlock) {
                             firstEnding = Music.concat(music, firstEnding);
                             secondEnding = Music.concat(music, secondEnding);
+                            music = new Rest(0);
                             repeatBlock = true;
                         }
                     } else {
@@ -294,6 +293,7 @@ public class MusicParser {
                             pastSecondEndingBeforeEndRepeat = true;
                         }
                     }
+                    break;
                 }
 
                 default: {

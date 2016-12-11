@@ -74,9 +74,10 @@ midtunefield ::= voice;
 
 // General
 
-comment ::= "%" text? NEWLINE;
+comment ::= "%" (text)? NEWLINE;
 eol ::= comment | NEWLINE;
-text ::= WHITESPACE* (DIGIT | ALPHABET | '.')+ (WHITESPACE | DIGIT | ALPHABET | '.')*;
+
+text ::= [^%\n\r]*;
 
 DIGIT ::= [0-9];
 ALPHABET ::= [a-zA-Z];
