@@ -151,7 +151,7 @@ public class MusicParser {
         // start parsing the tree
         Queue<ParseTree<MusicGrammar>> queue = new LinkedList<>(tree.children());
         while (queue.size() > 0) {
-            ParseTree<MusicGrammar> currentChild = queue.remove();  
+            ParseTree<MusicGrammar> currentChild = queue.remove();
             
             switch (currentChild.getName()) {
                 case MUSIC: {
@@ -183,10 +183,45 @@ public class MusicParser {
                 
                 case NOTEELEMENT: {
                     ParseTree<MusicGrammar> child = currentChild.children().get(0);
-                    queue.add(child);
+                    if (child.getName() == MusicGrammar.NOTE) {
+                        Music noteToAdd = parseNoteOrRest(child);
+                        if (!repeatBlock) {
+                            music = Music.concat(music, noteToAdd);                        
+                        } else {
+                            if (afterFirstEndingBeforeSecondEnding) {
+                                firstEnding = Music.concat(firstEnding, noteToAdd);
+                            } else if (pastSecondEndingBeforeEndRepeat) {
+                                secondEnding = Music.concat(secondEnding, noteToAdd);
+                            } else {
+                                firstEnding = Music.concat(firstEnding, noteToAdd);
+                                secondEnding = Music.concat(secondEnding, noteToAdd);
+                            }
+                        }                        
+                    } else {
+                        Music multinote = null;
+                        for (ParseTree<MusicGrammar> note : child.childrenByName(MusicGrammar.NOTE)) {
+                            if (multinote == null) {
+                                multinote = parseNoteOrRest(note);
+                            } else {
+                                multinote = Music.addVoice(parseNoteOrRest(note), multinote);
+                            }
+                        }
+                        if (!repeatBlock) {
+                            music = Music.concat(music, multinote);
+                        } else {
+                            if (afterFirstEndingBeforeSecondEnding) {
+                                firstEnding = Music.concat(firstEnding, multinote);
+                            } else if (pastSecondEndingBeforeEndRepeat) {
+                                secondEnding = Music.concat(secondEnding, multinote);
+                            } else {
+                                firstEnding = Music.concat(firstEnding, multinote);
+                                secondEnding = Music.concat(secondEnding, multinote);
+                            }
+                        }                        
+                    }
                     break;
                 }
-                
+                // TODO: Don't think this case is necessary anymore
                 case NOTE: {
                     Music noteToAdd = parseNoteOrRest(currentChild);
                     if (!repeatBlock) {
@@ -230,8 +265,9 @@ public class MusicParser {
                         } else if (accidental.equals("__")) {
                             pitch = pitch.transpose(-2);
                         } else {                                    // neutral
-                            continue;
+                            break;
                         }
+                        break;
                     }
                     
                     // Then take care of octaves
@@ -244,7 +280,7 @@ public class MusicParser {
                     //System.out.println("Contructed pitch: " + pitch.toString());
                     break;
                 }
-
+                // TODO: don't think this case is necessary anymore
                 case MULTINOTE: {
                     Music multinote = null;
                     for (ParseTree<MusicGrammar> child : currentChild.childrenByName(MusicGrammar.NOTE)) {
@@ -378,6 +414,11 @@ public class MusicParser {
         return finalMusic;
     }
     
+    /**
+     * parses a noteorrest into a Music that represents the underlying note or piece
+     * @param note a parsetree node that represents a note non-terminal
+     * @return a piece of music representing the note or rest found at note
+     */
     private static Music parseNoteOrRest(ParseTree<MusicGrammar> note) {
         ParseTree<MusicGrammar> noteOrRest = note.childrenByName(MusicGrammar.NOTEORREST).get(0);
         List<ParseTree<MusicGrammar>> pitches = noteOrRest.childrenByName(MusicGrammar.PITCH);
@@ -424,7 +465,7 @@ public class MusicParser {
                 semitonesUp = octave.length();
             }
             semitonesUp = (Character.isLowerCase(baseNote)) ? semitonesUp + 1 : semitonesUp;
-            Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp);
+            Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
             
 
             // TODO: Handle accidentals. 

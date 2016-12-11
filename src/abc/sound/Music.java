@@ -58,6 +58,8 @@ public interface Music {
         try {
             Header header = parseHeader(musicFile) ;
             
+            System.out.println(header);
+            
             Parser<MusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), MusicGrammar.ROOT);
             
             Music music = new Rest(0);

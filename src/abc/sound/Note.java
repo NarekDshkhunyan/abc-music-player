@@ -58,7 +58,7 @@ public class Note implements Music {
      */
     @Override
     public String toString() {
-        return null;
+        return pitch.toString() + duration/192.0;
     }
     
     @Override

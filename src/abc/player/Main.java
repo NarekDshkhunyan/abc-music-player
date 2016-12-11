@@ -1,16 +1,11 @@
 package abc.player;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
 
-import abc.sound.Header;
-import abc.sound.Music;
-import abc.sound.SequencePlayer;
+import abc.sound.*;
 
 /**
  * Main entry point of your application.
@@ -35,9 +30,9 @@ public class Main {
         
         try {
             int beatsPerMinute = header.getTempoBPM(); 
-            int ticksPerBeat = 2;
-            double atBeat = 0;                                                         // TODO placeholder
-            SequencePlayer player = new SequencePlayer(beatsPerMinute, ticksPerBeat);  // TODO figure this out
+            int ticksPerBeat = 192;
+            double atBeat = 12;                                                        
+            SequencePlayer player = new SequencePlayer(beatsPerMinute, ticksPerBeat); 
             music.play(player, atBeat);
         
         } catch (MidiUnavailableException mue) {
@@ -47,16 +42,14 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        Queue<String> arguments = new LinkedList<String>(Arrays.asList(args));
-        arguments.add("sample_abc/piece1.abc");
-        //arguments.add("sample_abc/piece2.abc");
-        //arguments.add("sample_abc/sample1.abc");
-        if (arguments.isEmpty()) {
+    public static void main(String[] args) throws InterruptedException {
+        if (args.length == 0) {
             throw new RuntimeException("No abc file specified!");
         } else {
-            String fileName = arguments.remove();
-            play(fileName);
+            for (int i = 0; i < args.length; i++) {
+                String fileName = args[i];
+                play(fileName);
+            }     
         }
     }
 }
