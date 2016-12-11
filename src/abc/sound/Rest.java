@@ -40,7 +40,11 @@ public class Rest implements Music {
     public void play(SequencePlayer player, double atBeat) {
         return;
     }
-
+    /**
+     * Converts rest into a human-readable string of the format:
+     *  z*<duration>/192.0
+     * @return string representation of this
+     */
     @Override
     public String toString() {
         return "z" + duration/192.0;

@@ -33,13 +33,11 @@ public class Concat implements Music {
     
     @Override
     public double duration() {
-        // TODO Auto-generated method stub
         return music1.duration() + music2.duration();
     }
 
     @Override
     public Music transpose(int semitonesUp) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -49,6 +47,10 @@ public class Concat implements Music {
         music2.play(player, atBeat + music1.duration());
     }
 
+    /**
+     * String representation of this in the where the string representations of music1 and music2 are separated by a single space
+     * @return string rep of this as described above
+     */
     @Override
     public String toString() {
         return music1.toString() + " " + music2.toString();

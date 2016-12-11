@@ -57,9 +57,7 @@ public interface Music {
     public static Music parseMusic(File musicFile) {
         try {
             Header header = parseHeader(musicFile) ;
-            
-            System.out.println(header);
-            
+                       
             Parser<MusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), MusicGrammar.ROOT);
             
             Music music = new Rest(0);
@@ -89,6 +87,7 @@ public interface Music {
      */
     double duration();
     
+    // TODO: Decide if we need this? If we only transpose pitches, we might not need this
     /**
      * Transpose all notes upward or downward in pitch.
      * @param semitonesUp semitones by which to transpose

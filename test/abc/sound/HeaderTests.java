@@ -13,7 +13,7 @@ import org.junit.Test;
  * For tests on parsing header information in abc files, look at ParserTests
  *
  */
-public class HeaderTest {
+public class HeaderTests {
 
     /*
      * Testing strategy:

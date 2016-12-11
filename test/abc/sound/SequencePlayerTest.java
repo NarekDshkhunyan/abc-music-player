@@ -125,7 +125,6 @@ public class SequencePlayerTest {
         } catch (InvalidMidiDataException imde) {
             imde.printStackTrace();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -201,7 +200,6 @@ public class SequencePlayerTest {
         } catch (InvalidMidiDataException imde) {
             imde.printStackTrace();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

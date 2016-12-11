@@ -29,7 +29,6 @@ public class MusicParserTests {
      *      tree contains voices in body
      *      
      *  buildMusic(tree, header) --> music
-     *      music is a single voice/multiple voices
      *      tree contains repeats and nth repeats
      *      tree contains tuplets
      *      tree contains chords
@@ -128,5 +127,11 @@ public class MusicParserTests {
         assertEquals("expected correct number of voices", 2, header.getVoices().keySet().size());
         assertTrue("expected correct voice in voices", header.getVoices().containsKey("1"));
         assertTrue("expected correct voice in voices", header.getVoices().containsKey("2"));
+    }
+    
+    // buildMusic tests
+
+    @Test
+    public void testBuildMusicOnlySingleNotes() {
     }
 }

@@ -53,12 +53,11 @@ public class Note implements Music {
     
     /**
      * converts the note to a human-readable string of the format:
-     *  pitch: pitch
-     *  duration: duration
+     *  <pitch><duration/192.0>
      */
     @Override
     public String toString() {
-        return pitch.toString() + duration/192.0;
+        return pitch.toString() + duration/Music.DEFAULT_DURATION_OF_DEFAULT_NOTE;
     }
     
     @Override

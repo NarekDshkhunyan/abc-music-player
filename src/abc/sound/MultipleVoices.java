@@ -34,42 +34,28 @@ public class MultipleVoices implements Music {
         this.rest = rest;
         checkRep();
     }
-    
-    /**
-     * @return one of the pieces of music in this together
-     */
-    public Music top() {
-        return recentVoice;
-    }
-    
-    /**
-     * @return the remaining pieces of music in this together
-     */
-    public Music rest() {
-        return rest;
-    }
-    
-    
 
     @Override
     public double duration() {
-        // TODO Auto-generated method stub
         return Double.max(recentVoice.duration(), rest.duration());
     }
 
     @Override
     public Music transpose(int semitonesUp) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void play(SequencePlayer player, double atBeat) {
-        // TODO Auto-generated method stub
         recentVoice.play(player, atBeat);
         rest.play(player, atBeat);
     }
     
+    /**
+     * represents a human readable string of the format:
+     * Together[<recentVoiceStringRep> |||| <restStringRep>]
+     * @return string of this as described above
+     */
     @Override
     public String toString() {
         return "Together[" + recentVoice.toString() + "||||" + rest.toString() +"]";
