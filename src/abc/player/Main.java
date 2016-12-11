@@ -1,6 +1,9 @@
 package abc.player;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
@@ -31,11 +34,10 @@ public class Main {
         try {
             int beatsPerMinute = header.getTempoBPM(); 
             int ticksPerBeat = 192;
-            double atBeat = 12;                                                        
+            int atBeat = 12;                                                        
             SequencePlayer player = new SequencePlayer(beatsPerMinute, ticksPerBeat); 
             music.play(player, atBeat);
             player.play();
-        
         } catch (MidiUnavailableException mue) {
             mue.printStackTrace();
         } catch (InvalidMidiDataException imde) {
@@ -43,14 +45,12 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException {       
         if (args.length == 0) {
             throw new RuntimeException("No abc file specified!");
         } else {
-            for (int i = 0; i < args.length; i++) {
-                String fileName = args[i];
-                play(fileName);
-            }     
+            String fileName = args[0];
+            play(fileName);
         }
     }
 }
