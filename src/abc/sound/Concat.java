@@ -34,7 +34,7 @@ public class Concat implements Music {
     @Override
     public double duration() {
         // TODO Auto-generated method stub
-        return 0;
+        return music1.duration() + music2.duration();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class Concat implements Music {
 
     @Override
     public String toString() {
-        return "Concat [music1=" + music1 + ", music2=" + music2 + "]";
+        return music1.toString() + " " + music2.toString();
     }
 
     @Override

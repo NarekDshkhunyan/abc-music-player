@@ -5,7 +5,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import abc.sound.Music;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiUnavailableException;
+
+import abc.sound.*;
 
 /**
  * Main entry point of your application.
@@ -22,20 +25,28 @@ public class Main {
      * @param file the name of input abc file
      */
     public static void play(String file) {
-        // YOUR CODE HERE
+        File abcFile = new File(file);
+        Music music = Music.parseMusic(abcFile);
+        System.out.println(music.toString());
+        try {
+            SequencePlayer player = new SequencePlayer(140, 192); 
+            music.play(player, 12);
+            player.play();
+        } catch (MidiUnavailableException mue) {
+            throw new RuntimeException("Could not initialize MIDI");
+        } catch (InvalidMidiDataException imd) {
+            throw new RuntimeException("MidiData is invalid");
+        }
     }
 
-    public static void main(String[] args) {
-        Queue<String> arguments = new LinkedList<String>(Arrays.asList(args));
-        //arguments.add("sample_abc/piece1.abc");
-        arguments.add("sample_abc/piece2.abc");
-        //arguments.add("sample_abc/sample1.abc");
-        if (arguments.isEmpty()) {
+    public static void main(String[] args) throws InterruptedException {
+        if (args.length == 0) {
             throw new RuntimeException("No abc file specified!");
         } else {
-            String fileName = arguments.remove();
-            File abcFile = new File(fileName);
-            Music.parseMusic(abcFile);
+            for (int i = 0; i < args.length; i++) {
+                String fileName = args[i];
+                play(fileName);
+            }
         }
     }
 }

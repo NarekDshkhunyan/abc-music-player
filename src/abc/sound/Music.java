@@ -41,6 +41,8 @@ public interface Music {
             ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
             Header header = HeaderParser.buildHeader(headerTree);
             
+            System.out.println(header);
+            
             Parser<MusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), MusicGrammar.ROOT);
             
             Music music = new Rest(0);

@@ -72,7 +72,7 @@ public class MultipleVoices implements Music {
     
     @Override
     public String toString() {
-        return "Together [m1=" + recentVoice + ", rest=" + rest + "]";
+        return "Together[" + recentVoice.toString() + "||||" + rest.toString() +"]";
     }
 
     @Override

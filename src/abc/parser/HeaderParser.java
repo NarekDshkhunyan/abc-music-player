@@ -124,7 +124,6 @@ public class HeaderParser {
                  }
                  
                  case LINE: {
-                     //System.out.println(currentChild.getContents());
                      List<ParseTree<AbcGrammar>> midtunefields = currentChild.childrenByName(AbcGrammar.MIDTUNEFIELD);
                      List<ParseTree<AbcGrammar>> elements = currentChild.childrenByName(AbcGrammar.ELEMENT);
                      if (midtunefields.isEmpty()) {
@@ -154,6 +153,9 @@ public class HeaderParser {
                  }
              
              }
+         }
+         if (voices.get("").isEmpty()) {
+             voices.remove("");
          }
          return new Header(title, index, key, composer, meter, length, tempoBaseNote, bpm, voices);
      } 
