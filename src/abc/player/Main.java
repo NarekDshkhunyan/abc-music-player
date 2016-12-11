@@ -1,6 +1,9 @@
 package abc.player;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
@@ -31,10 +34,11 @@ public class Main {
         try {
             int beatsPerMinute = header.getTempoBPM(); 
             int ticksPerBeat = 192;
-            double atBeat = 12;                                                        
+            int atBeat = 12;                                                        
             SequencePlayer player = new SequencePlayer(beatsPerMinute, ticksPerBeat); 
             music.play(player, atBeat);
-        
+            player.play();
+            
         } catch (MidiUnavailableException mue) {
             mue.printStackTrace();
         } catch (InvalidMidiDataException imde) {
@@ -43,11 +47,32 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        if (args.length == 0) {
+        Queue<String> arguments = new LinkedList<String>(Arrays.asList(args));
+        
+        /* These pieces can be played now */
+        //arguments.add("sample_abc/piece1.abc"); 
+        //arguments.add("sample_abc/piece2.abc");
+        //arguments.add("sample_abc/sample1.abc");
+        //arguments.add("sample_abc/sample2.abc");
+        //arguments.add("sample_abc/sample3.abc");
+        //arguments.add("sample_abc/scale.abc");
+        //arguments.add("sample_abc/prelude.abc");
+        //arguments.add("sample_abc/invention.abc");
+        //arguments.add("sample_abc/little_night_music.abc");
+        
+        /* These pieces still cannot be played */
+        //arguments.add("sample_abc/fur_elise.abc");
+        //arguments.add("sample_abc/paddy.abc");
+        //arguments.add("sample_abc/waxies_dargle.abc");
+        //arguments.add("sample_abc/abc_song.abc");
+        
+        
+        if (false) {
             throw new RuntimeException("No abc file specified!");
         } else {
-            for (int i = 0; i < args.length; i++) {
-                String fileName = args[i];
+            for (int i = 0; i < arguments.size(); i++) {
+                String fileName = arguments.poll();
+                //System.out.println(fileName);
                 play(fileName);
             }     
         }
