@@ -32,11 +32,6 @@ public class Rest implements Music {
     }
 
     @Override
-    public Music transpose(int semitonesUp) {
-        return this;
-    }
-
-    @Override
     public void play(SequencePlayer player, double atBeat) {
         return;
     }

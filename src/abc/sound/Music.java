@@ -50,14 +50,12 @@ public interface Music {
      }
                     
     /**
-     * parses abc file into Music
-     * @param musicFile abc file to be parsed; must be properly formatted as defined by the abc notation
-     * @return Music representing the piece in the abc file
+     * parses the lines specified in a header into Music
+     * @param Header object that contains all the lines corresponding to the voices found in the abc File of the header
+     * @return Music representing the music found in the Header
      */
-    public static Music parseMusic(File musicFile) {
-        try {
-            Header header = parseHeader(musicFile) ;
-                       
+    public static Music parseMusic(Header header) {
+        try {                      
             Parser<MusicGrammar> musicParser = GrammarCompiler.compile(new File("src/abc/parser/musicNotation.g"), MusicGrammar.ROOT);
             
             Music music = new Rest(0);
@@ -86,17 +84,6 @@ public interface Music {
      * @return double corresponding to the total duration in number of beats for given piece of music
      */
     double duration();
-    
-    // TODO: Decide if we need this? If we only transpose pitches, we might not need this
-    /**
-     * Transpose all notes upward or downward in pitch.
-     * @param semitonesUp semitones by which to transpose
-     * @return for Music m, return m' such that for all notes n in m, the
-     *         corresponding note n' in m' has
-     *         n'.pitch() == n.pitch().transpose(semitonesUp), and m' is
-     *         otherwise identical to m
-     */
-    public Music transpose(int semitonesUp);
     
     /**
      * Play this piece.

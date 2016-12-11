@@ -41,11 +41,6 @@ public class MultipleVoices implements Music {
     }
 
     @Override
-    public Music transpose(int semitonesUp) {
-        return null;
-    }
-
-    @Override
     public void play(SequencePlayer player, double atBeat) {
         recentVoice.play(player, atBeat);
         rest.play(player, atBeat);

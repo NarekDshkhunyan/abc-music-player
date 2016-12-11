@@ -42,11 +42,6 @@ public class Note implements Music {
     }
 
     @Override
-    public Music transpose(int semitonesUp) {
-        return new Note(pitch.transpose(semitonesUp), duration);
-    }
-
-    @Override
     public void play(SequencePlayer player, double atBeat) {
         player.addNote(pitch.toMidiNote(), (int) atBeat, (int) duration);
     }

@@ -40,29 +40,7 @@ public class MusicParser {
         Pitches(Pitch pitch, int semitone){
             this.pitch = pitch.transpose(semitone);
         }             
-    }
-    
-    /**
-     * Modify the frequency of a note (pitch) by the number of semitones given. It could
-     * either increase or decrease the frequency depending on the boolean increase.
-     * 
-     * @param pitch Pitch that we want to modify.
-     * @param semitone int semitones is the number of semitones we want to modify pitch by.
-     * @param change boolean, if true: increase the pitch by semitone.
-     *                          if false: decrease the pitch by semitone.
-     *                          
-     * @return the new modified pitch.
-     */
-    private Pitch modifyPitch(Pitch pitch, int semitone, boolean change){
-        Pitch newPitch;
-        if (change){
-            newPitch = pitch.transpose(semitone);     
-        }
-        newPitch = pitch.transpose(-1*semitone);
-          
-        return newPitch;    
-    }
-    
+    }   
     
     /**
      * Builds a mapping between list of strings, which correspond to key signatures,
@@ -218,89 +196,6 @@ public class MusicParser {
                                 secondEnding = Music.concat(secondEnding, multinote);
                             }
                         }                        
-                    }
-                    break;
-                }
-                // TODO: Don't think this case is necessary anymore
-                case NOTE: {
-                    Music noteToAdd = parseNoteOrRest(currentChild);
-                    if (!repeatBlock) {
-                        music = Music.concat(music, noteToAdd);                        
-                    } else {
-                        if (afterFirstEndingBeforeSecondEnding) {
-                            firstEnding = Music.concat(firstEnding, noteToAdd);
-                        } else if (pastSecondEndingBeforeEndRepeat) {
-                            secondEnding = Music.concat(secondEnding, noteToAdd);
-                        } else {
-                            firstEnding = Music.concat(firstEnding, noteToAdd);
-                            secondEnding = Music.concat(secondEnding, noteToAdd);
-                        }
-                    }
-                    break;
-                }
-                
-                // TODO: Do we need this?
-                case PITCH: {
-                    //System.out.println(currentChild);
-                    
-                    // Create a pitch first
-                    Pitch pitch = null;
-                    char basenote  = currentChild.childrenByName(MusicGrammar.BASENOTE).get(0).getContents().charAt(0);
-                    if ( Character.isUpperCase(basenote)) {
-                        pitch = new Pitch(basenote);                            // so if char is 'C', make pitch C 
-                    } else {
-                        pitch = new Pitch(Character.toUpperCase(basenote));     // TODO something is wrong here, for example g is printed as G'
-                        pitch = pitch.transpose(12);                            // so if char is 'c', make pitch c
-                    }
-                    
-                    // Then take care of accidentals
-                    if ( !currentChild.childrenByName(MusicGrammar.ACCIDENTAL).isEmpty()) {
-                        String accidental  = currentChild.childrenByName(MusicGrammar.ACCIDENTAL).get(0).getContents();
-                        if (accidental.equals("^")) {
-                            pitch = pitch.transpose(1);
-                        } else if (accidental.equals("^^")) {
-                            pitch = pitch.transpose(2);
-                        } else if (accidental.equals("_")) {
-                            pitch = pitch.transpose(-1);
-                        } else if (accidental.equals("__")) {
-                            pitch = pitch.transpose(-2);
-                        } else {                                    // neutral
-                            break;
-                        }
-                        break;
-                    }
-                    
-                    // Then take care of octaves
-                    if ( !currentChild.childrenByName(MusicGrammar.OCTAVE).isEmpty()) {
-                        String octave  = currentChild.childrenByName(MusicGrammar.OCTAVE).get(0).getContents();      
-                        int semitoneChange = octave.charAt(0) == ',' ? -12*octave.length() : 12*octave.length();
-                        pitch = pitch.transpose(semitoneChange);
-                    }
-                    
-                    //System.out.println("Contructed pitch: " + pitch.toString());
-                    break;
-                }
-                // TODO: don't think this case is necessary anymore
-                case MULTINOTE: {
-                    Music multinote = null;
-                    for (ParseTree<MusicGrammar> child : currentChild.childrenByName(MusicGrammar.NOTE)) {
-                        if (multinote == null) {
-                            multinote = parseNoteOrRest(child);
-                        } else {
-                            multinote = Music.addVoice(parseNoteOrRest(child), multinote);
-                        }
-                    }
-                    if (!repeatBlock) {
-                        music = Music.concat(music, multinote);
-                    } else {
-                        if (afterFirstEndingBeforeSecondEnding) {
-                            firstEnding = Music.concat(firstEnding, multinote);
-                        } else if (pastSecondEndingBeforeEndRepeat) {
-                            secondEnding = Music.concat(secondEnding, multinote);
-                        } else {
-                            firstEnding = Music.concat(firstEnding, multinote);
-                            secondEnding = Music.concat(secondEnding, multinote);
-                        }
                     }
                     break;
                 }

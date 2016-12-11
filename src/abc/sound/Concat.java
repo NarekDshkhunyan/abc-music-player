@@ -37,11 +37,6 @@ public class Concat implements Music {
     }
 
     @Override
-    public Music transpose(int semitonesUp) {
-        return null;
-    }
-
-    @Override
     public void play(SequencePlayer player, double atBeat) {
         music1.play(player, atBeat);
         music2.play(player, atBeat + music1.duration());

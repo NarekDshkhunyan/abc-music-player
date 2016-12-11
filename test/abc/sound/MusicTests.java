@@ -18,13 +18,6 @@ public class MusicTests {
      *      Music is a concat
      *      Music is a MultipleVoices
      *  
-     *  transpose(semitonesUp) --> result (possibly not needed)
-     *      Music is a single note
-     *          semitones is a factor of 12, semitones is not a factor of 12
-     *      Music is a single rest
-     *      Music is a concat
-     *      Music is a MultipleVoices
-     *  
      *  addVoice(voice,rest) --> result
      *      voice is a single note, single rest, is a concat, is a MultipleVoices
      *      rest is a single note, single rest, is a concat, is a MultipleVoices
@@ -116,24 +109,5 @@ public class MusicTests {
     public void testToStringMultipleVoices() {
         Music music = Music.addVoice(NOTE_1, REST_1);
         assertEquals("expected correct duration for a concat", "Together[" + B.toString() + 1.0/192.0 + "||||z" + 1.0/192.0 +"]", music.toString());        
-    }
-        
-    
-//    @Test
-//    public void testTransposeUp() {
-//        String[] expected = {"D", "^D", "E", "F", "^F", "G", "^G", "A", "^A", "B", "C'", "^C'", "D'"}; 
-//        for (int i = 0; i < 13; i++) {
-//            Pitch transposed = D.transpose(i);
-//            assertEquals(transposed.toString(), expected[i]);
-//        }
-//    }
-//    
-//    @Test
-//    public void testTransposeDown() {
-//        String[] expected = {"A,", "^A,", "B,", "C", "^C", "D", "^D", "E", "F", "^F", "G", "^G", "A"}; 
-//        for (int i = -12; i < 1; i++) {
-//            Pitch transposed = A.transpose(i);
-//            assertEquals(transposed.toString(), expected[i+12]);
-//        }
-//    }
+    }      
 }

@@ -1,9 +1,6 @@
 package abc.player;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
@@ -29,7 +26,7 @@ public class Main {
         Header header = Music.parseHeader(abcFile);
         System.out.println(header.toString());
         
-        Music music = Music.parseMusic(abcFile);
+        Music music = Music.parseMusic(header);
         
         try {
             int beatsPerMinute = header.getTempoBPM(); 
