@@ -126,7 +126,7 @@ public class HeaderParser {
                  case LINE: {
                      //System.out.println(currentChild.getContents());
                      List<ParseTree<AbcGrammar>> midtunefields = currentChild.childrenByName(AbcGrammar.MIDTUNEFIELD);
-                     List<ParseTree<AbcGrammar>> elements = currentChild.childrenByName(AbcGrammar.ELEMENT);
+                     //List<ParseTree<AbcGrammar>> elements = currentChild.childrenByName(AbcGrammar.ELEMENT);
                      if (midtunefields.isEmpty()) {
                          List<String> voiceLines = new ArrayList<>(voices.get(currentVoice));
                          voiceLines.add(currentChild.getContents());
