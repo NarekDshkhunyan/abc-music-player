@@ -92,16 +92,20 @@ public class HeaderParser {
                      String newMeter = currentChild.childrenByName(AbcGrammar.METER).get(0).getContents().trim();
                      if (!(newMeter.equals("C") || newMeter.equals("C|"))) {
                          meter = newMeter;
-                         if (!lengthDefined) {
-                             String[] splitMeter = meter.split("/");
-                             if (Double.parseDouble(splitMeter[0])/Double.parseDouble(splitMeter[1]) < 0.75) {
-                                 length = "1/16";
-                             } else {
-                                 length = "1/8";
-                             }
+                     } else if (newMeter.equals("C")) {
+                         meter = "4/4";
+                     } else {
+                         meter = "2/2";
+                     }
+                     if (!lengthDefined) {
+                         String[] splitMeter = meter.split("/");
+                         if (Double.parseDouble(splitMeter[0])/Double.parseDouble(splitMeter[1]) < 0.75) {
+                             length = "1/16";
+                         } else {
+                             length = "1/8";
                          }
                      }
-                     break;                     
+                     break; 
                  }
                  
                  case TEMPOFIELD: {
