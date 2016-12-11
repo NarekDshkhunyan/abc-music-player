@@ -70,8 +70,8 @@ public interface Music {
                     voicesLines.add(String.join("", lines));
                 }
             }
-            for (String voiceLines : voicesLines) {
-                ParseTree<MusicGrammar> musicTree = musicParser.parse(voiceLines);
+            for (String voiceLine : voicesLines) {
+                ParseTree<MusicGrammar> musicTree = musicParser.parse(voiceLine);
                 Music musicNew = MusicParser.buildMusic(musicTree, header);
                 music = new MultipleVoices(musicNew, music);
             }

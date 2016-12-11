@@ -34,6 +34,7 @@ public class Main {
             double atBeat = 12;                                                        
             SequencePlayer player = new SequencePlayer(beatsPerMinute, ticksPerBeat); 
             music.play(player, atBeat);
+            player.play();
         
         } catch (MidiUnavailableException mue) {
             mue.printStackTrace();
