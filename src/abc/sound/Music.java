@@ -2,7 +2,6 @@ package abc.sound;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,26 @@ public interface Music {
      public static final String DEFAULT_COMPOSER = "Unknown";
      
      public static final int DEFAULT_DURATION_OF_DEFAULT_NOTE = 192;
+     
+     
+     /**
+      * Extracts header information from abc file
+      * @param musicFile abc file to be parsed; must be properly formatted as defined by the abc notation
+      * @return Header representing the header information in the abc file
+      */
+     public static Header parseHeader(File musicFile) {
+        try {
+            Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+            ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+            Header header = HeaderParser.buildHeader(headerTree);
+            return header;
+            
+        } catch (UnableToParseException ex) {
+            throw new IllegalArgumentException("input argument is invalid, could not be parsed: ", ex);
+        } catch (IOException ex) {
+           throw new RuntimeException("Could not open grammar file, this shouldn't happen: ", ex);
+       }
+     }
                     
     /**
      * parses abc file into Music
@@ -37,9 +56,7 @@ public interface Music {
      */
     public static Music parseMusic(File musicFile) {
         try {
-            Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
-            ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
-            Header header = HeaderParser.buildHeader(headerTree);
+            Header header = parseHeader(musicFile) ;
             
             System.out.println(header);
             
