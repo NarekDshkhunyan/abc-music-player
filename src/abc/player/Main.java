@@ -25,6 +25,7 @@ public class Main {
         File abcFile = new File(file);
         Header header = Music.parseHeader(abcFile);
         System.out.println(header.toString());
+        
         Music music = Music.parseMusic(header);
         try {
             int beatsPerMinute = header.getTempoBPM(); 
@@ -41,12 +42,13 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException {       
-//        if (args.length == 0) {
-//            throw new RuntimeException("No abc file specified!");
-//        } else {
-            //String fileName = args[0];
-            String fileName = "sample_abc/abc_song.abc";
+        if (args.length == 0) {
+            throw new RuntimeException("No abc file specified!");
+        } else {
+            String fileName = args[0];
+            //String fileName = "sample_abc/abc_song.abc";
+            //String fileName = "sample_abc/little_night_music.abc";
             play(fileName);
-//        }
+        }
     }
 }

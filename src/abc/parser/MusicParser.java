@@ -6,57 +6,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Queue;
-
-import javax.swing.plaf.OptionPaneUI;
 
 import abc.sound.*;
 import lib6005.parser.ParseTree;
 
 public class MusicParser {
     
-    // TODO: We have to incorporate accidentals into note creation (using key signatures and any in piece changes)
-    // TODO: incorporate length changes for tuplets
-    
     private static Map<List<String>, List<String>> sharpKeySignatures = getSharpKeySignatures();
     private static Map<List<String>, List<String>> flatKeySignatures = getFlatKeySignatures();
-    private static boolean barState = false;
-    private static Map<Character, Integer> charToAccidental = new HashMap<>();
-    
-    private final static int FLAT_SEMITONE = -1;
-    private final static int SHARP_SEMITONE = 1;
-    
-    private enum Pitches{
-        SHARPA(new Pitch('A'), SHARP_SEMITONE),
-        FLATA(new Pitch('A'), FLAT_SEMITONE),
-        SHARPB(new Pitch('B'), SHARP_SEMITONE),
-        FLATB(new Pitch('B'), FLAT_SEMITONE),
-        SHARPC(new Pitch('C'), SHARP_SEMITONE),
-        FLATC(new Pitch('C'), FLAT_SEMITONE),
-        SHARPD(new Pitch('D'), SHARP_SEMITONE),
-        FLATD(new Pitch('D'), FLAT_SEMITONE),
-        SHARPE(new Pitch('E'), SHARP_SEMITONE),
-        FLATE(new Pitch('E'), FLAT_SEMITONE),
-        SHARPF(new Pitch('F'), SHARP_SEMITONE),
-        FLATF(new Pitch('F'), FLAT_SEMITONE),
-        SHARPG(new Pitch('G'), SHARP_SEMITONE),
-        FLATG(new Pitch('G'), FLAT_SEMITONE);
-        
-        private Pitch pitch;
-        private double semitone;
-        
-        Pitches(Pitch pitch, int semitone){
-            this.pitch = pitch.transpose(semitone);
-        }    
-        
-        private double getSemitone(){
-            return this.semitone;  
-        }    
-    }  
-    
-    
+    private static Map<Character, Integer> charToAccidental = new HashMap<>();  
+      
     /**
      * Builds a mapping between list of strings, which correspond to key signatures,
      * and a list of sharp pitches.
@@ -122,17 +83,8 @@ public class MusicParser {
      * @return a Music that the parse tree represents
      */
     public static Music buildMusic(ParseTree<MusicGrammar> tree, Header header) {
-                        
-        Map<List<String>, List<String>> sharpKeySingatures = MusicParser.sharpKeySignatures;
-        Map<List<String>, List<String>> flatKeySignatures = MusicParser.flatKeySignatures;
         
         String keySignature = header.getKey(); //Gets key signature of String
-        Map<String, List<String>> modifiedAccidentals = new HashMap<>(); //Map to keep track of accidental modifications
-       
-        String meter = header.getMeter();
-        String length = header.getLength();
-        String baseNote = header.getTempoBaseNote();
-        int bpm = header.getTempoBPM();
         boolean repeatBlock = false;
         boolean afterFirstEndingBeforeSecondEnding = false;
         boolean pastSecondEndingBeforeEndRepeat = false;
@@ -144,7 +96,6 @@ public class MusicParser {
 
         
         // start parsing the tree
-        int barCount = 0;
         Queue<ParseTree<MusicGrammar>> queue = new LinkedList<>(tree.children());
         while (queue.size() > 0) {
             ParseTree<MusicGrammar> currentChild = queue.remove();
@@ -180,7 +131,7 @@ public class MusicParser {
                 case NOTEELEMENT: {
                     ParseTree<MusicGrammar> child = currentChild.children().get(0);
                     if (child.getName() == MusicGrammar.NOTE) {
-                        Music noteToAdd = parseNoteOrRest(child, OptionalDouble.of(1.0), keySignature, barCount);
+                        Music noteToAdd = parseNoteOrRest(child, OptionalDouble.of(1.0), keySignature);
                         if (!repeatBlock) {
                             music = Music.concat(music, noteToAdd);                        
                         } else {
@@ -197,9 +148,9 @@ public class MusicParser {
                         Music multinote = null;
                         for (ParseTree<MusicGrammar> note : child.childrenByName(MusicGrammar.NOTE)) {
                             if (multinote == null) {
-                                multinote = parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature, barCount);
+                                multinote = parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature);
                             } else {
-                                multinote = Music.addVoice(parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature, barCount), multinote);
+                                multinote = Music.addVoice(parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature), multinote);
                             }
                         }
                         if (!repeatBlock) {
@@ -236,13 +187,13 @@ public class MusicParser {
                         //System.out.println("MY CHILD: "+ child);
                         Music nextElement = null;
                         if (child.getName() == MusicGrammar.NOTE) {
-                            nextElement = parseNoteOrRest(child, noteLengthMultiplier, keySignature, barCount);                            
+                            nextElement = parseNoteOrRest(child, noteLengthMultiplier, keySignature);                            
                         } else {
                             for (ParseTree<MusicGrammar> multinoteChild : child.childrenByName(MusicGrammar.NOTE)) {
                                 if (nextElement == null) {
-                                     nextElement = parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature, barCount);
+                                     nextElement = parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature);
                                 } else {
-                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature, barCount), nextElement);
+                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature), nextElement);
                                 }
                             }                            
                         }
@@ -343,7 +294,7 @@ public class MusicParser {
      * @param note a parsetree node that represents a note non-terminal
      * @return a piece of music representing the note or rest found at note
      */
-    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, OptionalDouble tupletMeasure, String keySignature, int barCount) {
+    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, OptionalDouble tupletMeasure, String keySignature) {
         //System.out.println("KEY: " + keySignature);
         
         double tupletMeasureDouble = tupletMeasure.isPresent() ? tupletMeasure.getAsDouble() : 1.0;
@@ -403,64 +354,78 @@ public class MusicParser {
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
             System.out.println("ORIGINAL: " + pitch);
             
+            pitch = applyKeySignature(baseNote, pitch, keySignature);
+            System.out.println("Key applied: " + pitch);
+            
+            pitch = applyAccidentals(baseNote, pitch, accidental);
+            System.out.println("Accidents applied: " + pitch);
+
+            return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier * tupletMeasureDouble);
+            }  
+        }
+            
+        /**
+         * Updates the pitch as necessary given the key signature
+         * 
+         * @param baseNote character representation of the note
+         * @param pitch the pitch to modify
+         * @param keySignature the key signature that might affect the pitch
+         * @return pitch updated pitch
+         */
+        private static Pitch applyKeySignature(char baseNote, Pitch pitch, String keySignature) {
+            
+            /* If base note is among affected sharp notes,
+             * transpose the current pitch up by one semitone
+             */
             for (List<String> key: sharpKeySignatures.keySet()){
                 if (key.contains(keySignature)){
                     List<String> affectedSharpNotes = MusicParser.sharpKeySignatures.get(key);
                     if (affectedSharpNotes.contains(Character.toString(baseNote))){
-                        System.out.println("BEFORE TRANSPOSING: " + pitch.toString());
-                        pitch = pitch.transpose(1);
-                        System.out.println("AFTER TRANSPOSING: " + pitch.toString());   
+                        pitch = pitch.transpose(1);   
                     }
                 }  
             }
             
+            /* If base note is among affected flat notes,
+             * transpose the current pitch down by one semitone
+             */
             for (List<String> key: flatKeySignatures.keySet()){
                 if(key.contains(keySignature)){
                     List<String> affectedFlatNotes = MusicParser.flatKeySignatures.get(key);
                     if (affectedFlatNotes.contains(Character.toString(baseNote))){
-                        System.out.println("BEFORE TRANSPOSING: " + pitch.toString());
                         pitch = pitch.transpose(-1);
-                        System.out.println("AFTER TRANSPOSING: " + pitch.toString());
                     }   
                 }    
             }
-            
-            System.out.println("Bar:" + barCount);
-            System.out.println(charToAccidental);
+           
+            return pitch;
+        }
+               
+        /**
+         * Update the pitch as necessary given the accidents
+         * 
+         * @param baseNote character representation of the note
+         * @param pitch the pitch to modify
+         * @param accidental single or multiple sharps or flats that take effect for the duration of the bar
+         * @return pitch updated pitch
+         */
+        private static Pitch applyAccidentals(char baseNote, Pitch pitch, String accidental) { 
             
             if (charToAccidental.containsKey(Character.toUpperCase(baseNote))) {
                 pitch = pitch.transpose(charToAccidental.get(Character.toUpperCase(baseNote)));
-                System.out.println("Transposed pitch1:" + pitch.toString() + '\n');
             }
-//            if (charToAccidental.containsKey(Character.toLowerCase(baseNote)) || (charToAccidental.containsKey(Character.toUpperCase(baseNote)))) {
-//                pitch = pitch.transpose(charToAccidental.get(baseNote));
-//                System.out.println("Transposed pitch1:" + pitch.toString() + '\n');
-//            }
              
-            // Specifically, we need to be able to keep track of modified accidentals throughout a bar and key signatures
+            // Keep track of modified accidentals throughout a bar and key signatures
             if (accidental.length() > 0) {
                 if (accidental.charAt(0) == '^') {
                     pitch = pitch.transpose(accidental.length() * 1);
                     charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
-                    System.out.println("Transposed pitch2:" + pitch.toString());
-                    //System.out.println(charToAccidental);
                 } else if (accidental.charAt(0) == '_') {
                     pitch = pitch.transpose(accidental.length() * -1);
                     charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
-                    System.out.println("Transposed pitch:" + pitch.toString());
-                    //System.out.println(charToAccidental);
-                }
-              
+                }              
             }
             
-            //if (barCount%2 == 0) {
-                //barState = true
-//            } else {
-//                barState = false;
-//                //charToAccidental = new HashMap<>();
-//            }
-            
-            return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier * tupletMeasureDouble);
-        }
-    }    
-}
+            return pitch;
+        }    
+    }
