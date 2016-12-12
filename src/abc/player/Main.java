@@ -41,12 +41,12 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException {       
-        if (args.length == 0) {
-            throw new RuntimeException("No abc file specified!");
-        } else {
-            String fileName = args[0];
-            //String fileName = "sample_abc/paddy.abc";
+//        if (args.length == 0) {
+//            throw new RuntimeException("No abc file specified!");
+//        } else {
+            //String fileName = args[0];
+            String fileName = "sample_abc/abc_song.abc";
             play(fileName);
-        }
+//        }
     }
 }
