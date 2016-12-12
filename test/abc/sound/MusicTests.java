@@ -88,26 +88,26 @@ public class MusicTests {
     // covers toString for Rest
     @Test
     public void testToStringRest() {
-        assertEquals("expected correct string representation", "z" + 1.0/192.0, REST_1.toString());
+        assertEquals("expected correct string representation", "z" + 1.0, REST_1.toString());
     }
     
     // covers toString for Note
     @Test
     public void testToStringNote() {
-        assertEquals("expected correct string representation", B.toString() + 1.0/192.0, NOTE_1.toString());
+        assertEquals("expected correct string representation", B.toString() + 1.0, NOTE_1.toString());
     }
     
     // covers toString for Concat
     @Test
     public void testToStringConcat() {
         Music music = Music.concat(NOTE_1, REST_1);
-        assertEquals("expected correct duration for a concat", B.toString() + 1.0/192.0 + " z" + 1.0/192.0, music.toString());        
+        assertEquals("expected correct duration for a concat", B.toString() + 1.0 + " z" + 1.0, music.toString());        
     }
     
     // covers toString for MultipleVoices
     @Test
     public void testToStringMultipleVoices() {
         Music music = Music.addVoice(NOTE_1, REST_1);
-        assertEquals("expected correct duration for a concat", "Together[" + B.toString() + 1.0/192.0 + "||||z" + 1.0/192.0 +"]", music.toString());        
+        assertEquals("expected correct duration for a concat", "Together[" + B.toString() + 1.0 + "||||z" + 1.0 +"]", music.toString());        
     }      
 }

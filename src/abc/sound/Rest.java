@@ -42,7 +42,7 @@ public class Rest implements Music {
      */
     @Override
     public String toString() {
-        return "z" + duration/192.0;
+        return "z" + duration;
     }
 
     @Override
