@@ -108,6 +108,6 @@ public class MusicTests {
     @Test
     public void testToStringMultipleVoices() {
         Music music = Music.addVoice(NOTE_1, REST_1);
-        assertEquals("expected correct duration for a concat", "Together[" + B.toString() + 1.0/192.0 + "||||z" + 1.0/192.0 +"]", music.toString());        
+        assertEquals("expected correct duration for a concat", "Together[" + B.toString() + 1.0 + "||||z" + 1.0 +"]", music.toString());        
     }      
 }
