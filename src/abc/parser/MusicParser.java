@@ -20,31 +20,38 @@ public class MusicParser {
     // TODO: We have to incorporate accidentals into note creation (using key signatures and any in piece changes)
     // TODO: incorporate length changes for tuplets
     
-    private static Map<List<String>, List<Pitches>> sharpKeySignatures = getSharpKeySignatures();
-    private static Map<List<String>, List<Pitches>> flatKeySignatures = getFlatKeySignatures();
+    private static Map<List<String>, List<String>> sharpKeySignatures = getSharpKeySignatures();
+    private static Map<List<String>, List<String>> flatKeySignatures = getFlatKeySignatures();
+    
+    private final static int FLAT_SEMITONE = -1;
+    private final static int SHARP_SEMITONE = 1;
     
     private enum Pitches{
-        SHARPA(new Pitch('A'), 1),
-        FLATA(new Pitch('A'), -1),
-        SHARPB(new Pitch('B'), 1),
-        FLATB(new Pitch('B'), -1),
-        SHARPC(new Pitch('C'), 1),
-        FLATC(new Pitch('C'), -1),
-        SHARPD(new Pitch('D'), 1),
-        FLATD(new Pitch('D'), -1),
-        SHARPE(new Pitch('E'), 1),
-        FLATE(new Pitch('E'), -1),
-        SHARPF(new Pitch('F'), 1),
-        FLATF(new Pitch('F'), -1),
-        SHARPG(new Pitch('G'), 1),
-        FLATG(new Pitch('G'), -1);
+        SHARPA(new Pitch('A'), SHARP_SEMITONE),
+        FLATA(new Pitch('A'), FLAT_SEMITONE),
+        SHARPB(new Pitch('B'), SHARP_SEMITONE),
+        FLATB(new Pitch('B'), FLAT_SEMITONE),
+        SHARPC(new Pitch('C'), SHARP_SEMITONE),
+        FLATC(new Pitch('C'), FLAT_SEMITONE),
+        SHARPD(new Pitch('D'), SHARP_SEMITONE),
+        FLATD(new Pitch('D'), FLAT_SEMITONE),
+        SHARPE(new Pitch('E'), SHARP_SEMITONE),
+        FLATE(new Pitch('E'), FLAT_SEMITONE),
+        SHARPF(new Pitch('F'), SHARP_SEMITONE),
+        FLATF(new Pitch('F'), FLAT_SEMITONE),
+        SHARPG(new Pitch('G'), SHARP_SEMITONE),
+        FLATG(new Pitch('G'), FLAT_SEMITONE);
         
         private Pitch pitch;
+        private double semitone;
         
         Pitches(Pitch pitch, int semitone){
             this.pitch = pitch.transpose(semitone);
         }    
         
+        private double getSemitone(){
+            return this.semitone;  
+        }    
     }  
     
     
@@ -54,25 +61,25 @@ public class MusicParser {
      * Mapping between scales with sharp key signatures and affected pitches. ([Major key, Minor key]: [sharp Pitches]).
      * @return sharpKeySignatures key signatures and their corresponding sharp pitches
      */
-    private static Map<List<String>, List<Pitches>> getSharpKeySignatures() {
+    private static Map<List<String>, List<String>> getSharpKeySignatures() {
         
-        Map<List<String>, List<Pitches>> sharpKeySignaturesMapping = new HashMap<>();
+        Map<List<String>, List<String>> sharpKeySignaturesMapping = new HashMap<>();
       
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>()); //0 sharps
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("G", "Em")), 
-                new ArrayList<>(Arrays.asList(Pitches.SHARPF))); //F#
+                new ArrayList<>(Arrays.asList("F"))); //F#
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("D", "Bm")), 
-                new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC))); //F#, C#
+                new ArrayList<>(Arrays.asList("F", "C"))); //F#, C#
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("A", "F#m")), 
-                new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG))); //F#, C#, G#
+                new ArrayList<>(Arrays.asList("F", "C", "G"))); //F#, C#, G#
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("E", "C#m")), 
-                new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD)));  //F#, C#, G#, D#
+                new ArrayList<>(Arrays.asList("F", "C", "G", "D")));  //F#, C#, G#, D#
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("B", "G#m")), 
-                new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD, Pitches.SHARPA)));//F#, C#, G#, D#, A#
+                new ArrayList<>(Arrays.asList("F", "C", "G", "D", "A")));//F#, C#, G#, D#, A#
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("F#", "D#m")), 
-                new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD, Pitches.SHARPA, Pitches.SHARPE))); //F#, C#, G#, D#, A#, E#
+                new ArrayList<>(Arrays.asList("F", "C", "G", "D", "A", "E"))); //F#, C#, G#, D#, A#, E#
         sharpKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C#", "A#m")), 
-                new ArrayList<>(Arrays.asList(Pitches.SHARPF, Pitches.SHARPC, Pitches.SHARPG, Pitches.SHARPD, Pitches.SHARPA, Pitches.SHARPE, Pitches.SHARPB))); //F#, C#, G#, D#, A#, E#, B#
+                new ArrayList<>(Arrays.asList("F", "C", "G", "D", "A", "E", "B"))); //F#, C#, G#, D#, A#, E#, B#
     
         return sharpKeySignaturesMapping;
     
@@ -84,25 +91,25 @@ public class MusicParser {
      * Mapping between scales with flat key signatures and affected pitches. ([Major key, Minor key] : [flat Pitches]).
      * @return flatKeySignatures key signatures and their corresponding flat pitches
      */
-    private static Map<List<String>, List<Pitches>> getFlatKeySignatures() {
+    private static Map<List<String>, List<String>> getFlatKeySignatures() {
         
-        Map<List<String>, List<Pitches>> flatKeySignaturesMapping = new HashMap<>();
+        Map<List<String>, List<String>> flatKeySignaturesMapping = new HashMap<>();
         
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("C", "Am")), new ArrayList<>());   //0 flats 
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("F", "Dm")), 
-                new ArrayList<>(Arrays.asList(Pitches.FLATB)));   //Bb
+                new ArrayList<>(Arrays.asList("B")));   //Bb
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Bb", "Gm")), 
-                new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE))); //Bb, Eb
+                new ArrayList<>(Arrays.asList("B", "E"))); //Bb, Eb
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Eb", "Cm")), 
-                new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA))); //Bb, Eb, Ab
+                new ArrayList<>(Arrays.asList("B", "E", "A"))); //Bb, Eb, Ab
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Ab", "Fm")),
-                new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD))); //Bb, Eb, Ab, Db
+                new ArrayList<>(Arrays.asList("B", "E", "A", "D"))); //Bb, Eb, Ab, Db
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Db", "Bbm")),
-                new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD, Pitches.FLATG))); //Bb, Eb, Ab, Db, Gb
+                new ArrayList<>(Arrays.asList("B", "E", "A", "D", "G"))); //Bb, Eb, Ab, Db, Gb
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Gb", "Ebm")),
-                new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD, Pitches.FLATG, Pitches.FLATC))); //Bb, Eb, Ab, Db, Gb, Cb
+                new ArrayList<>(Arrays.asList("B", "E", "A", "D", "G", "C"))); //Bb, Eb, Ab, Db, Gb, Cb
         flatKeySignaturesMapping.put(new ArrayList<>(Arrays.asList("Cb", "Abm")),
-                new ArrayList<>(Arrays.asList(Pitches.FLATB, Pitches.FLATE, Pitches.FLATA, Pitches.FLATD, Pitches.FLATG, Pitches.FLATC, Pitches.FLATF))); //Bb, Eb, Ab, Db, Gb, Cb, Fb
+                new ArrayList<>(Arrays.asList("B", "E", "A", "D", "G", "C", "F"))); //Bb, Eb, Ab, Db, Gb, Cb, Fb
           
     return flatKeySignaturesMapping; 
     }
@@ -114,8 +121,8 @@ public class MusicParser {
      */
     public static Music buildMusic(ParseTree<MusicGrammar> tree, Header header) {
                         
-        Map<List<String>, List<Pitches>> sharpKeySingatures = MusicParser.sharpKeySignatures;
-        Map<List<String>, List<Pitches>> flatKeySignatures = MusicParser.flatKeySignatures;
+        Map<List<String>, List<String>> sharpKeySingatures = MusicParser.sharpKeySignatures;
+        Map<List<String>, List<String>> flatKeySignatures = MusicParser.flatKeySignatures;
         
         String keySignature = header.getKey(); //Gets key signature of String
         Map<String, List<String>> modifiedAccidentals = new HashMap<>(); //Map to keep track of accidental modifications
@@ -159,6 +166,7 @@ public class MusicParser {
                 // parse element from here on
                 case ELEMENT: {
                     for (ParseTree<MusicGrammar> child : currentChild) {
+                        //System.out.println(child.getName());
                         if (child.getName() != MusicGrammar.WHITESPACE) {
                             queue.add(child);
                         }
@@ -169,7 +177,7 @@ public class MusicParser {
                 case NOTEELEMENT: {
                     ParseTree<MusicGrammar> child = currentChild.children().get(0);
                     if (child.getName() == MusicGrammar.NOTE) {
-                        Music noteToAdd = parseNoteOrRest(child, OptionalDouble.of(1.0));
+                        Music noteToAdd = parseNoteOrRest(child, OptionalDouble.of(1.0), keySignature);
                         if (!repeatBlock) {
                             music = Music.concat(music, noteToAdd);                        
                         } else {
@@ -186,9 +194,9 @@ public class MusicParser {
                         Music multinote = null;
                         for (ParseTree<MusicGrammar> note : child.childrenByName(MusicGrammar.NOTE)) {
                             if (multinote == null) {
-                                multinote = parseNoteOrRest(note, OptionalDouble.of(1.0));
+                                multinote = parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature);
                             } else {
-                                multinote = Music.addVoice(parseNoteOrRest(note, OptionalDouble.of(1.0)), multinote);
+                                multinote = Music.addVoice(parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature), multinote);
                             }
                         }
                         if (!repeatBlock) {
@@ -225,13 +233,13 @@ public class MusicParser {
                         //System.out.println("MY CHILD: "+ child);
                         Music nextElement = null;
                         if (child.getName() == MusicGrammar.NOTE) {
-                            nextElement = parseNoteOrRest(child, noteLengthMultiplier);                            
+                            nextElement = parseNoteOrRest(child, noteLengthMultiplier, keySignature);                            
                         } else {
                             for (ParseTree<MusicGrammar> multinoteChild : child.childrenByName(MusicGrammar.NOTE)) {
                                 if (nextElement == null) {
-                                     nextElement = parseNoteOrRest(multinoteChild, noteLengthMultiplier);
+                                     nextElement = parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature);
                                 } else {
-                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, noteLengthMultiplier), nextElement);
+                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature), nextElement);
                                 }
                             }                            
                         }
@@ -287,6 +295,7 @@ public class MusicParser {
                 }
                 
                 case NTHREPEAT: {
+                  
                     String nthRepeat = currentChild.getContents();
                     
                     if (nthRepeat.equals("[1")) {
@@ -305,7 +314,8 @@ public class MusicParser {
                     }
                     break;
                 }
-
+                
+                
                 default: {
                     break;
                 }
@@ -324,7 +334,8 @@ public class MusicParser {
      * @param note a parsetree node that represents a note non-terminal
      * @return a piece of music representing the note or rest found at note
      */
-    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, OptionalDouble tupletMeasure) {
+    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, OptionalDouble tupletMeasure, String keySignature) {
+        System.out.println("KEY: " + keySignature);
         
         double tupletMeasureDouble = tupletMeasure.isPresent() ? tupletMeasure.getAsDouble() : 1.0;
         
@@ -375,12 +386,35 @@ public class MusicParser {
             
             semitonesUp = (Character.isLowerCase(baseNote)) ? semitonesUp + 1 : semitonesUp;
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
+            //System.out.println("ORIGINAL: " + pitch);
             
-
+            for (List<String> key: sharpKeySignatures.keySet()){
+                if (key.contains(keySignature)){
+                    List<String> affectedSharpNotes = MusicParser.sharpKeySignatures.get(key);
+                    if (affectedSharpNotes.contains(Character.toString(baseNote))){
+                        //System.out.println("BEFORE TRANSPOSING: " + pitch.toString());
+                        pitch = pitch.transpose(1);
+                        //System.out.println("AFTER TRANSPOSING: " + pitch.toString());   
+                    }
+                }  
+            }
+            
+            for (List<String> key: flatKeySignatures.keySet()){
+                if(key.contains(keySignature)){
+                    List<String> affectedFlatNotes = MusicParser.flatKeySignatures.get(key);
+                    if (affectedFlatNotes.contains(Character.toString(baseNote))){
+                        //System.out.println("BEFORE TRANSPOSING: " + pitch.toString());
+                        pitch = pitch.transpose(-1);
+                        //System.out.println("AFTER TRANSPOSING: " + pitch.toString());
+                    }   
+                }    
+            }
+            
             // TODO: Handle accidentals. 
             // Specifically, we need to be able to keep track of modified accidentals throughout a bar and key signatures
             if (accidentals.size() > 0) {
                 String accidental = accidentals.get(0).getContents();
+                
             }
             return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier * tupletMeasureDouble);
         }

@@ -6,7 +6,7 @@ root ::= music;
 
 music ::= line+;
 line ::= element* NEWLINE | midtunefield | comment;
-element ::= noteelement | tupletelement | barline | nthrepeat | WHITESPACE;
+element ::= noteelement | tupletelement | barline | nthrepeat | WHITESPACE | accidental;
 
 @skip WHITESPACE{
 voice ::= "V:" text eol;

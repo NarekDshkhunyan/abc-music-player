@@ -25,9 +25,7 @@ public class Main {
         File abcFile = new File(file);
         Header header = Music.parseHeader(abcFile);
         System.out.println(header.toString());
-        
         Music music = Music.parseMusic(header);
-        
         try {
             int beatsPerMinute = header.getTempoBPM(); 
             int ticksPerBeat = 192;
@@ -47,6 +45,7 @@ public class Main {
             throw new RuntimeException("No abc file specified!");
         } else {
             String fileName = args[0];
+            //String fileName = "sample_abc/paddy.abc";
             play(fileName);
         }
     }
