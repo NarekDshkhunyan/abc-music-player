@@ -85,6 +85,23 @@ public class MusicParser {
     public static Music buildMusic(ParseTree<MusicGrammar> tree, Header header) {
         
         String keySignature = header.getKey(); //Gets key signature of String
+        String length = header.getLength();
+        String tempoBaseNote = header.getTempoBaseNote();
+        
+        double durationOfDefaultNote = Music.DEFAULT_DURATION_OF_DEFAULT_NOTE;
+        
+        
+        if (!length.equals(tempoBaseNote)) {
+            String[] lengthFrac = length.split("/");
+            double lengthDouble = Double.parseDouble(lengthFrac[0])/Double.parseDouble(lengthFrac[1]);
+            String[] tempoFrac = tempoBaseNote.split("/");
+            double tempoDouble = Double.parseDouble(tempoFrac[0])/Double.parseDouble(tempoFrac[1]);
+            double durationMultiplier = lengthDouble/tempoDouble;
+            durationOfDefaultNote = durationOfDefaultNote*durationMultiplier;
+            
+        }
+        System.out.println(durationOfDefaultNote);
+        
         boolean repeatBlock = false;
         boolean afterFirstEndingBeforeSecondEnding = false;
         boolean pastSecondEndingBeforeEndRepeat = false;
@@ -93,7 +110,6 @@ public class MusicParser {
         Music music = new Rest(0); // current major section music
         Music firstEnding = new Rest(0);
         Music secondEnding = new Rest(0);
-
         
         // start parsing the tree
         Queue<ParseTree<MusicGrammar>> queue = new LinkedList<>(tree.children());
@@ -120,7 +136,6 @@ public class MusicParser {
                 // parse element from here on
                 case ELEMENT: {
                     for (ParseTree<MusicGrammar> child : currentChild) {
-                        //System.out.println(child.getName());
                         if (child.getName() != MusicGrammar.WHITESPACE) {
                             queue.add(child);
                         }
@@ -131,7 +146,7 @@ public class MusicParser {
                 case NOTEELEMENT: {
                     ParseTree<MusicGrammar> child = currentChild.children().get(0);
                     if (child.getName() == MusicGrammar.NOTE) {
-                        Music noteToAdd = parseNoteOrRest(child, OptionalDouble.of(1.0), keySignature);
+                        Music noteToAdd = parseNoteOrRest(child, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature);
                         if (!repeatBlock) {
                             music = Music.concat(music, noteToAdd);                        
                         } else {
@@ -149,9 +164,9 @@ public class MusicParser {
                         
                         for (ParseTree<MusicGrammar> note : child.childrenByName(MusicGrammar.NOTE)) {
                             if (multinote == null) {
-                                multinote = parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature);
+                                multinote = parseNoteOrRest(note, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature);
                             } else {
-                                multinote = Music.addVoice(parseNoteOrRest(note, OptionalDouble.of(1.0), keySignature), multinote);
+                                multinote = Music.addVoice(parseNoteOrRest(note, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature), multinote);
                             }
                         }
                         if (!repeatBlock) {
@@ -172,7 +187,6 @@ public class MusicParser {
                 
                 case TUPLETELEMENT: {
                     ParseTree<MusicGrammar> specTree = currentChild.childrenByName(MusicGrammar.TUPLETSPEC).get(0);
-                    //System.out.println("SPEC-TREE: " + specTree);
                     String spec = specTree.childrenByName(MusicGrammar.DIGIT).get(0).getContents();
                     OptionalDouble noteLengthMultiplier = OptionalDouble.of(1.0);
                     if (spec.equals("2")) {
@@ -182,19 +196,17 @@ public class MusicParser {
                     } else {
                         noteLengthMultiplier = OptionalDouble.of(3.0/4.0);                        
                     }
-                    // TODO: Incorporate multiplier
                     Music tuplet = null;
                     for (ParseTree<MusicGrammar> child : currentChild.childrenByName(MusicGrammar.NOTEELEMENT)) {
-                        //System.out.println("MY CHILD: "+ child);
                         Music nextElement = null;
                         if (child.getName() == MusicGrammar.NOTE) {
-                            nextElement = parseNoteOrRest(child, noteLengthMultiplier, keySignature);                            
+                            nextElement = parseNoteOrRest(child, durationOfDefaultNote, noteLengthMultiplier, keySignature);                            
                         } else {
                             for (ParseTree<MusicGrammar> multinoteChild : child.childrenByName(MusicGrammar.NOTE)) {
                                 if (nextElement == null) {
-                                     nextElement = parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature);
+                                     nextElement = parseNoteOrRest(multinoteChild, durationOfDefaultNote, noteLengthMultiplier, keySignature);
                                 } else {
-                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, noteLengthMultiplier, keySignature), nextElement);
+                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, durationOfDefaultNote, noteLengthMultiplier, keySignature), nextElement);
                                 }
                             }                            
                         }
@@ -292,8 +304,7 @@ public class MusicParser {
      * @param note a parsetree node that represents a note non-terminal
      * @return a piece of music representing the note or rest found at note
      */
-    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, OptionalDouble tupletMeasure, String keySignature) {
-        //System.out.println("KEY: " + keySignature);
+    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, double durationOfDefaultNote, OptionalDouble tupletMeasure, String keySignature) {
         
         double tupletMeasureDouble = tupletMeasure.isPresent() ? tupletMeasure.getAsDouble() : 1.0;
         
@@ -330,13 +341,13 @@ public class MusicParser {
         }
 
         if (rests.size() > 0) {
-            return new Rest(Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier);
+            return new Rest(durationOfDefaultNote * noteLengthMultiplier);
         } else {
             ParseTree<MusicGrammar> pitchTree = pitches.get(0);
             char baseNote = pitchTree.childrenByName(MusicGrammar.BASENOTE).get(0).getContents().charAt(0);
             
             String accidental = "";
-            System.out.println(pitchTree.toString());
+            //System.out.println(pitchTree.toString());
             if (!pitchTree.childrenByName(MusicGrammar.ACCIDENTAL).isEmpty()) {
                 accidental = pitchTree.childrenByName(MusicGrammar.ACCIDENTAL).get(0).getContents();
             }
@@ -350,16 +361,17 @@ public class MusicParser {
             
             semitonesUp = (Character.isLowerCase(baseNote)) ? semitonesUp + 1 : semitonesUp;
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
-            System.out.println("ORIGINAL: " + pitch);
+            //System.out.println("ORIGINAL: " + pitch);
             
             pitch = applyKeySignature(baseNote, pitch, keySignature);
-            System.out.println("Key applied: " + pitch);
+            //System.out.println("Key applied: " + pitch);
             
             
             pitch = applyAccidentals(baseNote, pitch, accidental);
+
             System.out.println("Accidents applied: " + pitch + "\n");
 
-            return new Note(pitch, Music.DEFAULT_DURATION_OF_DEFAULT_NOTE * noteLengthMultiplier * tupletMeasureDouble);
+            return new Note(pitch, durationOfDefaultNote * noteLengthMultiplier * tupletMeasureDouble);
             }  
         }
             

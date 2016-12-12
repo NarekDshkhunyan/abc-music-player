@@ -139,7 +139,6 @@ public class HeaderParser {
                                          .getContents().trim();
                          currentVoice = voice;
                          if (!voices.containsKey(voice)) {
-                             System.out.println(voice);
                              voices.put(voice, new ArrayList<>());
                          }
                      }
