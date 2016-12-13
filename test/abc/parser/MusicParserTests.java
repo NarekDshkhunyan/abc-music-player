@@ -196,7 +196,7 @@ public class MusicParserTests {
         ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
         Music music = MusicParser.buildMusic(musicTree, header);
         Music midA = new Note(new Pitch('A').transpose(-1), 192);
-        Music highA = new Note(new Pitch('A').transpose(12), 192);
+        Music highA = new Note(new Pitch('A').transpose(11), 192);
 
         Music bar = Music.concat(Music.concat(new Rest(0), midA), highA);
         assertEquals("expected correctly parsed key signature effect", Music.concat(new Rest(0), bar), music);               
@@ -214,7 +214,7 @@ public class MusicParserTests {
         Music midAFlat = new Note(new Pitch('A').transpose(-1), 192);
         Music midASharp = new Note(new Pitch('A').transpose(1), 192);
         Music midANatural = new Note(new Pitch('A'), 192);
-        Music highA = new Note(new Pitch('A').transpose(12), 192);
+        Music highA = new Note(new Pitch('A').transpose(11), 192);
 
         
         Music expected = Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), midAFlat), highA), midASharp), midASharp), highA), midANatural), midANatural), midAFlat);
