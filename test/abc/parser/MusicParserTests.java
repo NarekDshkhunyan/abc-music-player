@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import abc.sound.Header;
+import abc.sound.*;
 import lib6005.parser.GrammarCompiler;
 import lib6005.parser.ParseTree;
 import lib6005.parser.Parser;
@@ -34,9 +34,11 @@ public class MusicParserTests {
      *      tree contains chords
      *      tree contains tuplets
      *      tree contains accidentals
-     *      tree contains different octaves of the same note
      *      header contains key signature besides C/Am
      */
+    
+    private static File musicGrammarFile = new File("src/abc/parser/musicNotation.g");
+    private static File abcNotationGrammarFile = new File("src/abc/parser/abcNotation.g");
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
@@ -50,7 +52,7 @@ public class MusicParserTests {
     @Test
     public void testBuildHeaderOnlyRequiredFieldsPresent() throws UnableToParseException, IOException {
         File musicFile = new File("sample_abc/sample1.abc");
-        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
         ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
         Header header = HeaderParser.buildHeader(headerTree);
         assertEquals("expected correct index", "1", header.getIndex());
@@ -66,7 +68,7 @@ public class MusicParserTests {
     @Test
     public void testBuildHeaderMeterPresentNoLength() throws UnableToParseException, IOException {
         File musicFile = new File("sample_abc/paddy.abc");
-        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
         ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
         Header header = HeaderParser.buildHeader(headerTree);
         assertEquals("expected default length", "1/8", header.getLength());
@@ -79,7 +81,7 @@ public class MusicParserTests {
     @Test
     public void testBuildHeaderNoQButLPresent() throws UnableToParseException, IOException {
         File musicFile = new File("sample_abc/noQ.abc");
-        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
         ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
         Header header = HeaderParser.buildHeader(headerTree);
         assertEquals("expected default length", "1/2", header.getLength());
@@ -92,7 +94,7 @@ public class MusicParserTests {
     @Test
     public void testBuildHeaderEverythingPresent() throws UnableToParseException, IOException {
         File musicFile = new File("sample_abc/piece1.abc");
-        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
         ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
         Header header = HeaderParser.buildHeader(headerTree);
         assertEquals("expected correct index", "1", header.getIndex());
@@ -109,7 +111,7 @@ public class MusicParserTests {
     @Test
     public void testBuildHeaderVoicesInBody() throws UnableToParseException, IOException {
         File musicFile = new File("sample_abc/invention.abc");
-        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
         ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
         Header header = HeaderParser.buildHeader(headerTree);
         assertEquals("expected correct number of voices", 2, header.getVoices().keySet().size());
@@ -121,7 +123,7 @@ public class MusicParserTests {
     @Test
     public void testBuildHeaderVoicesInHeader() throws UnableToParseException, IOException {
         File musicFile = new File("sample_abc/fur_elise.abc");
-        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(new File("src/abc/parser/abcNotation.g"), AbcGrammar.ROOT);
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
         ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
         Header header = HeaderParser.buildHeader(headerTree);
         assertEquals("expected correct number of voices", 2, header.getVoices().keySet().size());
@@ -131,7 +133,112 @@ public class MusicParserTests {
     
     // buildMusic tests
 
+    // covers the parsing of a single note
     @Test
-    public void testBuildMusicOnlySingleNotes() {
+    public void testBuildMusicOnlySingleNotes() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/sample3.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get("1"));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music music = MusicParser.buildMusic(musicTree, header);
+        assertEquals("expected correct music", Music.concat(new Rest(0), Music.concat(new Rest(0), new Note(new Pitch('C'), 192.0))), music);
+    }
+    
+    // covers the parsing of a tuplet
+    @Test
+    public void testBuildMusicTupletDifferentLengths() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/tuplet.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get(""));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music music = MusicParser.buildMusic(musicTree, header);
+        Music C = new Note(new Pitch('C'), 128);
+        Music G = new Note(new Pitch('G'), 384);
+        Music E = new Note(new Pitch('E'), 512);
+
+        Music tuplet = Music.concat(Music.concat(C, E), G);
+        assertEquals("expected correct music", Music.concat(new Rest(0), Music.concat(new Rest(0),tuplet)), music);        
+    }
+    
+    // covers the parsing of a chord
+    @Test
+    public void testBuildMusicChord() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/sample2.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get(""));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music music = MusicParser.buildMusic(musicTree, header);
+        Music C = new Note(new Pitch('C'), 192);
+        Music E = new Note(new Pitch('E'), 192);
+
+        Music chord = Music.addVoice(C, E);
+        assertEquals("expected correctly parsed chord [EC]", Music.concat(new Rest(0), Music.concat(new Rest(0), chord)), music);        
+    }
+    
+    // covers application of key signature
+    @Test
+    public void testBuildMusicKeySignature() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/key_signature_test.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get(""));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music music = MusicParser.buildMusic(musicTree, header);
+        Music midA = new Note(new Pitch('A').transpose(-1), 192);
+        Music highA = new Note(new Pitch('A').transpose(12), 192);
+
+        Music bar = Music.concat(Music.concat(new Rest(0), midA), highA);
+        assertEquals("expected correctly parsed key signature effect", Music.concat(new Rest(0), bar), music);               
+    }
+    
+    @Test
+    public void testBuildMusicAccidental() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/accidental_test.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get(""));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music music = MusicParser.buildMusic(musicTree, header);
+        Music midAFlat = new Note(new Pitch('A').transpose(-1), 192);
+        Music midASharp = new Note(new Pitch('A').transpose(1), 192);
+        Music midANatural = new Note(new Pitch('A'), 192);
+        Music highA = new Note(new Pitch('A').transpose(12), 192);
+
+        Music expected = Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), midAFlat), 
+                highA), midASharp), midASharp), midANatural), midANatural), midAFlat);
+        assertEquals("expected correctly parsed key signature effect", Music.concat(new Rest(0), expected), music);                       
+    }
+    
+    @Test
+    public void testBuildMusicRepeatMajorSection() {
+        
+    }
+    
+    @Test
+    public void testBuildMusicRepeatSubsection() {
+        
+    }
+    
+    @Test
+    public void testBuildMusicRepeatDifferentEndings() {
+        
+    }
+    
+    @Test
+    public void testBuildMusicDefaultNoteAndTempoBaseNoteAreDifferent() {
+        
     }
 }

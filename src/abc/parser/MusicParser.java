@@ -100,7 +100,6 @@ public class MusicParser {
             durationOfDefaultNote = durationOfDefaultNote*durationMultiplier;
             
         }
-        System.out.println(durationOfDefaultNote);
         
         boolean repeatBlock = false;
         boolean afterFirstEndingBeforeSecondEnding = false;
@@ -260,7 +259,6 @@ public class MusicParser {
                         repeatBlock = false;
                         pastSecondEndingBeforeEndRepeat = false;
                     }
-                    // TODO: Figure out what to do with regular bar lines that denote resets in any alterations to key signature
                     break;
                 }
                 
@@ -302,6 +300,9 @@ public class MusicParser {
     /**
      * parses a noteorrest into a Music that represents the underlying note or piece
      * @param note a parsetree node that represents a note non-terminal
+     * @param durationOfDefaultNote duration the default note of the piece
+     * @param tupletMeasure if note is part of a tuplet, include its measure
+     * @param keySignature keySignature of the piece the note is a part of
      * @return a piece of music representing the note or rest found at note
      */
     private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, double durationOfDefaultNote, OptionalDouble tupletMeasure, String keySignature) {
@@ -361,15 +362,9 @@ public class MusicParser {
             
             semitonesUp = (Character.isLowerCase(baseNote)) ? semitonesUp + 1 : semitonesUp;
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
-            //System.out.println("ORIGINAL: " + pitch);
             
             pitch = applyKeySignature(baseNote, pitch, keySignature);
-            //System.out.println("Key applied: " + pitch);
-            
-            
             pitch = applyAccidentals(baseNote, pitch, accidental);
-
-            System.out.println("Accidents applied: " + pitch + "\n");
 
             return new Note(pitch, durationOfDefaultNote * noteLengthMultiplier * tupletMeasureDouble);
             }  
@@ -440,7 +435,7 @@ public class MusicParser {
                     int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
                     int absSemitoneDifference = Math.abs(semitoneDifference);
                     pitch = pitch.transpose(-1*semitoneDifference);
-                    charToAccidental.put(Character.toUpperCase(baseNote), -1*semitoneDifference/absSemitoneDifference);
+                    charToAccidental.put(Character.toUpperCase(baseNote), -1*semitoneDifference/absSemitoneDifference);   
                 }
             }
             
