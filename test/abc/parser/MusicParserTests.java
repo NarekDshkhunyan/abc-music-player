@@ -211,14 +211,16 @@ public class MusicParserTests {
         String musicString = String.join("", header.getVoices().get(""));
         Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
         ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
-        Music music = MusicParser.buildMusic(musicTree, header);
         Music midAFlat = new Note(new Pitch('A').transpose(-1), 192);
         Music midASharp = new Note(new Pitch('A').transpose(1), 192);
         Music midANatural = new Note(new Pitch('A'), 192);
         Music highA = new Note(new Pitch('A').transpose(12), 192);
 
-        Music expected = Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), midAFlat), 
-                highA), midASharp), midASharp), midANatural), midANatural), midAFlat);
+        
+        Music expected = Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), midAFlat), highA), midASharp), midASharp), highA), midANatural), midANatural), midAFlat);
+        System.out.println(expected);
+
+        Music music = MusicParser.buildMusic(musicTree, header);
         assertEquals("expected correctly parsed key signature effect", Music.concat(new Rest(0), expected), music);                       
     }
     
