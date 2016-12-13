@@ -364,6 +364,7 @@ public class MusicParser {
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
             
             pitch = applyKeySignature(baseNote, pitch, keySignature);
+            
             pitch = applyAccidentals(baseNote, pitch, accidental);
 
             return new Note(pitch, durationOfDefaultNote * noteLengthMultiplier * tupletMeasureDouble);
@@ -400,6 +401,7 @@ public class MusicParser {
                     List<String> affectedFlatNotes = MusicParser.flatKeySignatures.get(key);
                     if (affectedFlatNotes.contains(Character.toString(baseNote))){
                         pitch = pitch.transpose(-1);
+                        System.out.println("PITCH AFTER KEY-SIGNATURE: " + pitch.toString());
                     }   
                 }    
             }
@@ -415,29 +417,48 @@ public class MusicParser {
          * @param accidental single or multiple sharps or flats that take effect for the duration of the bar
          * @return pitch updated pitch
          */
-        private static Pitch applyAccidentals(char baseNote, Pitch pitch, String accidental) { 
-            
-            //System.out.println("DICT: " + charToAccidental);
+        private static Pitch applyAccidentals(char baseNote, Pitch pitch, String accidental) {
             
             if (charToAccidental.containsKey(Character.toUpperCase(baseNote))) {
                 pitch = pitch.transpose(charToAccidental.get(Character.toUpperCase(baseNote)));
+                System.out.println("PITCH AFFECTED IN SAME BAR: " + pitch.toString());
             }
              
             // Keep track of modified accidentals throughout a bar and key signatures
             if (accidental.length() > 0) {
                 if (accidental.charAt(0) == '^') {
+                    int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
+                    int absSemitoneDifference = Math.abs(semitoneDifference);
+                    if (semitoneDifference != 0){
+                        pitch = pitch.transpose(-1*semitoneDifference);
+                    }
                     pitch = pitch.transpose(accidental.length() * 1);
-                    charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
+                    System.out.println("PITCH OVERRIDEN BY SHARP ACCIDENTAL: " + pitch.toString());
+                    charToAccidental.put(Character.toUpperCase(baseNote), accidental.length() + -1*semitoneDifference/absSemitoneDifference);
+                    
                 } else if (accidental.charAt(0) == '_') {
-                    pitch = pitch.transpose(accidental.length() * -1);
-                    charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
+                    int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
+                    int absSemitoneDifference = Math.abs(semitoneDifference);
+                    if (semitoneDifference != 0){
+                        pitch = pitch.transpose(-1*semitoneDifference);
+                    }
+                    pitch = pitch.transpose(-1*accidental.length() * 1);
+                    System.out.println("PITCH OVERRIDEN BY FLAT ACCIDENTAL: " + pitch.toString());
+                    charToAccidental.put(Character.toUpperCase(baseNote), accidental.length() + -1*semitoneDifference/absSemitoneDifference);
+      
+                    //charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
                 }else if (accidental.charAt(0) == '='){
                     int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
                     int absSemitoneDifference = Math.abs(semitoneDifference);
-                    pitch = pitch.transpose(-1*semitoneDifference);
-                    charToAccidental.put(Character.toUpperCase(baseNote), -1*semitoneDifference/absSemitoneDifference);   
+                    if (semitoneDifference != 0){
+                        pitch = pitch.transpose(-1*semitoneDifference);
+                        charToAccidental.put(Character.toUpperCase(baseNote), -1*semitoneDifference/absSemitoneDifference);       
+                    }
+                   
                 }
             }
+            
+           
             
             return pitch;
         }    
