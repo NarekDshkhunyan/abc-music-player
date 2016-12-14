@@ -225,6 +225,34 @@ public class MusicParserTests {
         assertEquals("expected correctly parsed key signature effect", Music.concat(new Rest(0), expected), music);                       
     }
     
+    //Complex test with A#m key signature that affects all notes into sharp notes. Also sharp, flat, and natural accidentals are applied.
+    @Test
+    public void testBuildMusicKeySignatureAccidental() throws UnableToParseException, IOException{
+        File musicFile = new File("sample_abc/accidental-keysig_test.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get(""));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music output = MusicParser.buildMusic(musicTree, header);
+        Music midCSharp = new Note(new Pitch('C').transpose(1), 192);
+        Music highGSharp = new Note(new Pitch('G').transpose(13), 192);
+        Music midAFlat = new Note(new Pitch('A').transpose(-1), 192);
+        Music midBSharp = new Note(new Pitch('B').transpose(1), 192);
+        Music midCNatural = new Note(new Pitch('C'), 192);
+        Music highCSharp = new Note(new Pitch('C').transpose(13), 192);
+        Music midESharp = new Note(new Pitch('E').transpose(1), 192);
+        Music midASharp = new Note(new Pitch('A').transpose(1), 192);
+        Music highESharp = new Note(new Pitch('E').transpose(13), 192);
+        Music midENatural = new Note(new Pitch('E'), 192);
+        
+        Music expected = Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), midCSharp), highGSharp), midAFlat), highCSharp), midASharp), midBSharp), midCNatural), midCNatural), midESharp), midESharp), highESharp), midENatural);
+        
+        assertEquals("expected correctly parsed music poece with A#m key signature and different accidentals", Music.concat(new Rest(0), expected), output);
+        
+                
+    }
     @Test
     public void testBuildMusicRepeatMajorSection() {
         

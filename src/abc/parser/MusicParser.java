@@ -16,12 +16,11 @@ public class MusicParser {
     
     private static Map<List<String>, List<String>> sharpKeySignatures = getSharpKeySignatures();
     private static Map<List<String>, List<String>> flatKeySignatures = getFlatKeySignatures();
-    private static Map<Character, Integer> charToAccidental = new HashMap<>();  
       
     /**
      * Builds a mapping between list of strings, which correspond to key signatures,
-     * and a list of sharp pitches.
-     * Mapping between scales with sharp key signatures and affected pitches. ([Major key, Minor key]: [sharp Pitches]).
+     * and a list of pitches that get affected by the key signatures.
+     * Mapping between scales with sharp key signatures and affected pitches. ([Major key, Minor key]: [Affected Pitches]).
      * @return sharpKeySignatures key signatures and their corresponding sharp pitches
      */
     private static Map<List<String>, List<String>> getSharpKeySignatures() {
@@ -50,8 +49,8 @@ public class MusicParser {
     
     /**
      * Builds a mapping between list of strings, which correspond to key signatures,
-     * and a list of flat pitches.
-     * Mapping between scales with flat key signatures and affected pitches. ([Major key, Minor key] : [flat Pitches]).
+     * and a list of Pitches that get affectes by the key signatures.
+     * Mapping between scales with flat key signatures and affected pitches. ([Major key, Minor key] : [Affected Pitches]).
      * @return flatKeySignatures key signatures and their corresponding flat pitches
      */
     private static Map<List<String>, List<String>> getFlatKeySignatures() {
@@ -78,7 +77,7 @@ public class MusicParser {
     }
     
     /**
-     * builds an abstract syntax tree of a piece of Music from a ParseTree
+     * Builds an abstract syntax tree of a piece of Music from a ParseTree
      * @param tree the parse tree that is constructed according to the specified abc notation grammar
      * @return a Music that the parse tree represents
      */
@@ -87,9 +86,9 @@ public class MusicParser {
         String keySignature = header.getKey(); //Gets key signature of String
         String length = header.getLength();
         String tempoBaseNote = header.getTempoBaseNote();
+        Map<String, Integer> charToAccidental = new HashMap<>();  
         
         double durationOfDefaultNote = Music.DEFAULT_DURATION_OF_DEFAULT_NOTE;
-        
         
         if (!length.equals(tempoBaseNote)) {
             String[] lengthFrac = length.split("/");
@@ -145,7 +144,7 @@ public class MusicParser {
                 case NOTEELEMENT: {
                     ParseTree<MusicGrammar> child = currentChild.children().get(0);
                     if (child.getName() == MusicGrammar.NOTE) {
-                        Music noteToAdd = parseNoteOrRest(child, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature);
+                        Music noteToAdd = parseNoteOrRest(child, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature, charToAccidental);
                         if (!repeatBlock) {
                             music = Music.concat(music, noteToAdd);                        
                         } else {
@@ -163,9 +162,9 @@ public class MusicParser {
                         
                         for (ParseTree<MusicGrammar> note : child.childrenByName(MusicGrammar.NOTE)) {
                             if (multinote == null) {
-                                multinote = parseNoteOrRest(note, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature);
+                                multinote = parseNoteOrRest(note, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature, charToAccidental);
                             } else {
-                                multinote = Music.addVoice(parseNoteOrRest(note, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature), multinote);
+                                multinote = Music.addVoice(parseNoteOrRest(note, durationOfDefaultNote, OptionalDouble.of(1.0), keySignature, charToAccidental), multinote);
                             }
                         }
                         if (!repeatBlock) {
@@ -199,13 +198,13 @@ public class MusicParser {
                     for (ParseTree<MusicGrammar> child : currentChild.childrenByName(MusicGrammar.NOTEELEMENT)) {
                         Music nextElement = null;
                         if (child.getName() == MusicGrammar.NOTE) {
-                            nextElement = parseNoteOrRest(child, durationOfDefaultNote, noteLengthMultiplier, keySignature);                            
+                            nextElement = parseNoteOrRest(child, durationOfDefaultNote, noteLengthMultiplier, keySignature, charToAccidental);                            
                         } else {
                             for (ParseTree<MusicGrammar> multinoteChild : child.childrenByName(MusicGrammar.NOTE)) {
                                 if (nextElement == null) {
-                                     nextElement = parseNoteOrRest(multinoteChild, durationOfDefaultNote, noteLengthMultiplier, keySignature);
+                                     nextElement = parseNoteOrRest(multinoteChild, durationOfDefaultNote, noteLengthMultiplier, keySignature, charToAccidental);
                                 } else {
-                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, durationOfDefaultNote, noteLengthMultiplier, keySignature), nextElement);
+                                    nextElement = Music.addVoice(parseNoteOrRest(multinoteChild, durationOfDefaultNote, noteLengthMultiplier, keySignature, charToAccidental), nextElement);
                                 }
                             }                            
                         }
@@ -232,8 +231,7 @@ public class MusicParser {
                 }
                 
                 case BARLINE: {
-                    String bar = currentChild.getContents();
-                    
+                    String bar = currentChild.getContents();   
                     charToAccidental = new HashMap<>();
                     
                     if (bar.equals("|]")) {
@@ -282,8 +280,7 @@ public class MusicParser {
                     }
                     break;
                 }
-                
-                
+   
                 default: {
                     break;
                 }
@@ -305,7 +302,7 @@ public class MusicParser {
      * @param keySignature keySignature of the piece the note is a part of
      * @return a piece of music representing the note or rest found at note
      */
-    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, double durationOfDefaultNote, OptionalDouble tupletMeasure, String keySignature) {
+    private static Music parseNoteOrRest(ParseTree<MusicGrammar> note, double durationOfDefaultNote, OptionalDouble tupletMeasure, String keySignature, Map<String, Integer> charToAccidentals) {
         
         double tupletMeasureDouble = tupletMeasure.isPresent() ? tupletMeasure.getAsDouble() : 1.0;
         
@@ -346,9 +343,9 @@ public class MusicParser {
         } else {
             ParseTree<MusicGrammar> pitchTree = pitches.get(0);
             char baseNote = pitchTree.childrenByName(MusicGrammar.BASENOTE).get(0).getContents().charAt(0);
+            String baseNoteOctave = Character.toString(baseNote);
             
             String accidental = "";
-            //System.out.println(pitchTree.toString());
             if (!pitchTree.childrenByName(MusicGrammar.ACCIDENTAL).isEmpty()) {
                 accidental = pitchTree.childrenByName(MusicGrammar.ACCIDENTAL).get(0).getContents();
             }
@@ -361,15 +358,31 @@ public class MusicParser {
             }
             
             semitonesUp = (Character.isLowerCase(baseNote)) ? semitonesUp + 1 : semitonesUp;
+            
+            if (semitonesUp > 0){
+                for (int i = 0; i < semitonesUp; i++){
+                    baseNoteOctave += "'"; 
+                } 
+            }else{
+                for (int i = 0; i < Math.abs(semitonesUp); i++){
+                    baseNoteOctave += ","; 
+                }   
+            }
+            
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
             
-            pitch = applyKeySignature(baseNote, pitch, keySignature);
+            Pitch newPitch = applyAccidentals(baseNote, pitch, accidental, baseNoteOctave, charToAccidentals);
             
-            pitch = applyAccidentals(baseNote, pitch, accidental);
-
+            if (!charToAccidentals.containsKey(baseNoteOctave)){
+                pitch = applyKeySignature(baseNote, pitch, keySignature); 
+            }else{
+                pitch = newPitch;
+            }
+      
             return new Note(pitch, durationOfDefaultNote * noteLengthMultiplier * tupletMeasureDouble);
-            }  
         }
+            }  
+        
             
         /**
          * Updates the pitch as necessary given the key signature
@@ -401,7 +414,6 @@ public class MusicParser {
                     List<String> affectedFlatNotes = MusicParser.flatKeySignatures.get(key);
                     if (affectedFlatNotes.contains(Character.toString(baseNote))){
                         pitch = pitch.transpose(-1);
-                        System.out.println("PITCH AFTER KEY-SIGNATURE: " + pitch.toString());
                     }   
                 }    
             }
@@ -410,68 +422,35 @@ public class MusicParser {
         }
                
         /**
-         * Update the pitch as necessary given the accidents
+         * Update the pitch as necessary given the accidentals and modifies charToAccidental
          * 
          * @param baseNote character representation of the note
          * @param pitch the pitch to modify
          * @param accidental single or multiple sharps or flats that take effect for the duration of the bar
          * @return pitch updated pitch
          */
-        private static Pitch applyAccidentals(char baseNote, Pitch pitch, String accidental) {
+        private static Pitch applyAccidentals(char baseNote, Pitch pitch, String accidental, String baseNoteOctave, Map<String, Integer> charToAccidental) {
             
-            if (charToAccidental.containsKey(baseNote)) {
-                if(charToAccidental.get(baseNote) == 999){
-                    pitch = new Pitch(baseNote);
-                }else{
-                    pitch = pitch.transpose(charToAccidental.get(baseNote));
-                }
-               
-                System.out.println("PITCH AFFECTED IN SAME BAR: " + pitch.toString());
-            }
-             
             // Keep track of modified accidentals throughout a bar and key signatures
             if (accidental.length() > 0) {
                 if (accidental.charAt(0) == '^') {
-                    int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
-                    int absSemitoneDifference = Math.abs(semitoneDifference);
-                    if (semitoneDifference != 0){
-                        pitch = pitch.transpose(-1*semitoneDifference/absSemitoneDifference);
-                        pitch = pitch.transpose(accidental.length()*1);
-                        charToAccidental.put(baseNote, accidental.length() + -1*semitoneDifference/absSemitoneDifference);
-                    }else{
-                        pitch = pitch.transpose(accidental.length()*1); 
-                        charToAccidental.put(baseNote, accidental.length());
-                    }
-                    
-                    System.out.println("PITCH OVERRIDEN BY SHARP ACCIDENTAL: " + pitch.toString());
+                    pitch = pitch.transpose(accidental.length()*1); 
+                    charToAccidental.put(baseNoteOctave, accidental.length());
                     
                 } else if (accidental.charAt(0) == '_') {
-                    int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
-                    int absSemitoneDifference = Math.abs(semitoneDifference);
-                    if (semitoneDifference != 0){
-                        pitch = pitch.transpose(-1*semitoneDifference);
-                        pitch = pitch.transpose(accidental.length()*-1);
-                        charToAccidental.put(baseNote, accidental.length() + -1*semitoneDifference/absSemitoneDifference);
-                    }else{
-                        pitch = pitch.transpose(accidental.length()*-1);
-                        charToAccidental.put(baseNote, -1*accidental.length());    
-                    }  
-                    
-                //charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
-                }else if (accidental.charAt(0) == '='){
-                    System.out.println("ORIGNAL PITCH: " + pitch.toString());
-                    System.out.println("BASE NOTE: " + new Pitch(Character.toUpperCase(baseNote)));
-                    int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
-                    int absSemitoneDifference = Math.abs(semitoneDifference);
-                    int naturalPitch = 999;
-                    System.out.println("SEMITONE DIFFERENCE: "+ semitoneDifference);
-                    if (semitoneDifference != 0){
-                        pitch = pitch.transpose(-1*semitoneDifference);
-                        charToAccidental.put(baseNote, naturalPitch);       
-                    }
-                       
+                   pitch = pitch.transpose(accidental.length()*-1);
+                   charToAccidental.put(baseNoteOctave, -1*accidental.length());  
+                   
+                } else if (accidental.charAt(0) == '=') {
+                    charToAccidental.put(baseNoteOctave, 0);
                 }
-            }       
+            } else {
+                if (charToAccidental.containsKey(baseNoteOctave)) {
+                    pitch = pitch.transpose(charToAccidental.get(baseNoteOctave));
+                }
+            }
+                   
             return pitch;
-        }    
-    }
+            }
+        }
+    
