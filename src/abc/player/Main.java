@@ -1,6 +1,15 @@
 package abc.player;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
@@ -40,12 +49,18 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {       
-        if (args.length == 0) {
+    public static void main(String[] args) { 
+        Queue<String> arguments = new LinkedList<String>(Arrays.asList(args));
+        arguments.add("sample_abc/piece1.abc");
+        //arguments.add("sample_abc/piece2.abc");
+        
+        if (arguments.size() == 0) {
             throw new RuntimeException("No abc file specified!");
         } else {
-            String fileName = args[0];
-            play(fileName);
+            for (int i = 0; i < arguments.size(); i++) {
+                String fileName = arguments.poll();
+                play(fileName);
+            }     
         }
     }
 }
