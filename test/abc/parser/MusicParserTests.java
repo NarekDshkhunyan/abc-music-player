@@ -221,6 +221,7 @@ public class MusicParserTests {
         System.out.println(expected);
 
         Music music = MusicParser.buildMusic(musicTree, header);
+        System.out.println(music);
         assertEquals("expected correctly parsed key signature effect", Music.concat(new Rest(0), expected), music);                       
     }
     

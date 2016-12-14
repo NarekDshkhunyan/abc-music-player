@@ -364,6 +364,7 @@ public class MusicParser {
             Pitch pitch = new Pitch(Character.toUpperCase(baseNote)).transpose(semitonesUp*12);
             
             pitch = applyKeySignature(baseNote, pitch, keySignature);
+            
             pitch = applyAccidentals(baseNote, pitch, accidental);
 
             return new Note(pitch, durationOfDefaultNote * noteLengthMultiplier * tupletMeasureDouble);
@@ -400,6 +401,7 @@ public class MusicParser {
                     List<String> affectedFlatNotes = MusicParser.flatKeySignatures.get(key);
                     if (affectedFlatNotes.contains(Character.toString(baseNote))){
                         pitch = pitch.transpose(-1);
+                        System.out.println("PITCH AFTER KEY-SIGNATURE: " + pitch.toString());
                     }   
                 }    
             }
@@ -415,30 +417,61 @@ public class MusicParser {
          * @param accidental single or multiple sharps or flats that take effect for the duration of the bar
          * @return pitch updated pitch
          */
-        private static Pitch applyAccidentals(char baseNote, Pitch pitch, String accidental) { 
+        private static Pitch applyAccidentals(char baseNote, Pitch pitch, String accidental) {
             
-            //System.out.println("DICT: " + charToAccidental);
-            
-            if (charToAccidental.containsKey(Character.toUpperCase(baseNote))) {
-                pitch = pitch.transpose(charToAccidental.get(Character.toUpperCase(baseNote)));
+            if (charToAccidental.containsKey(baseNote)) {
+                if(charToAccidental.get(baseNote) == 999){
+                    pitch = new Pitch(baseNote);
+                }else{
+                    pitch = pitch.transpose(charToAccidental.get(baseNote));
+                }
+               
+                System.out.println("PITCH AFFECTED IN SAME BAR: " + pitch.toString());
             }
              
             // Keep track of modified accidentals throughout a bar and key signatures
             if (accidental.length() > 0) {
                 if (accidental.charAt(0) == '^') {
-                    pitch = pitch.transpose(accidental.length() * 1);
-                    charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
-                } else if (accidental.charAt(0) == '_') {
-                    pitch = pitch.transpose(accidental.length() * -1);
-                    charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
-                }else if (accidental.charAt(0) == '='){
                     int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
                     int absSemitoneDifference = Math.abs(semitoneDifference);
-                    pitch = pitch.transpose(-1*semitoneDifference);
-                    charToAccidental.put(Character.toUpperCase(baseNote), -1*semitoneDifference/absSemitoneDifference);   
+                    if (semitoneDifference != 0){
+                        pitch = pitch.transpose(-1*semitoneDifference/absSemitoneDifference);
+                        pitch = pitch.transpose(accidental.length()*1);
+                        charToAccidental.put(baseNote, accidental.length() + -1*semitoneDifference/absSemitoneDifference);
+                    }else{
+                        pitch = pitch.transpose(accidental.length()*1); 
+                        charToAccidental.put(baseNote, accidental.length());
+                    }
+                    
+                    System.out.println("PITCH OVERRIDEN BY SHARP ACCIDENTAL: " + pitch.toString());
+                    
+                } else if (accidental.charAt(0) == '_') {
+                    int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
+                    int absSemitoneDifference = Math.abs(semitoneDifference);
+                    if (semitoneDifference != 0){
+                        pitch = pitch.transpose(-1*semitoneDifference);
+                        pitch = pitch.transpose(accidental.length()*-1);
+                        charToAccidental.put(baseNote, accidental.length() + -1*semitoneDifference/absSemitoneDifference);
+                    }else{
+                        pitch = pitch.transpose(accidental.length()*-1);
+                        charToAccidental.put(baseNote, -1*accidental.length());    
+                    }  
+                    
+                //charToAccidental.put(Character.toUpperCase(baseNote), accidental.length());
+                }else if (accidental.charAt(0) == '='){
+                    System.out.println("ORIGNAL PITCH: " + pitch.toString());
+                    System.out.println("BASE NOTE: " + new Pitch(Character.toUpperCase(baseNote)));
+                    int semitoneDifference = pitch.difference(new Pitch(Character.toUpperCase(baseNote)));
+                    int absSemitoneDifference = Math.abs(semitoneDifference);
+                    int naturalPitch = 999;
+                    System.out.println("SEMITONE DIFFERENCE: "+ semitoneDifference);
+                    if (semitoneDifference != 0){
+                        pitch = pitch.transpose(-1*semitoneDifference);
+                        charToAccidental.put(baseNote, naturalPitch);       
+                    }
+                       
                 }
-            }
-            
+            }       
             return pitch;
         }    
     }
