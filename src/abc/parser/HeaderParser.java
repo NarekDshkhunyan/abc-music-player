@@ -113,8 +113,8 @@ public class HeaderParser {
                      ParseTree<AbcGrammar> tempoNode = currentChild.childrenByName(AbcGrammar.TEMPO).get(0);
                      String tempo = tempoNode.getContents();
                      String[] splitTempo = tempo.split("=");
-                     tempoBaseNote = splitTempo[0];
-                     bpm = Integer.parseInt(splitTempo[1]);
+                     tempoBaseNote = splitTempo[0].trim();
+                     bpm = Integer.parseInt(splitTempo[1].trim());
                      break;                     
                  }
                  

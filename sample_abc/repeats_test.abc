@@ -1,0 +1,14 @@
+X:1
+T:voices
+K: C
+
+V: Repeat Major Section
+A C D | B :|
+
+V: Repeat Within Repeat Block
+
+A B |: C D | C E :|
+
+V: Two Endings
+
+A B |[1 C :|[2 D | 

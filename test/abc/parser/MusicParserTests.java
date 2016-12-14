@@ -225,22 +225,87 @@ public class MusicParserTests {
     }
     
     @Test
-    public void testBuildMusicRepeatMajorSection() {
+    public void testBuildMusicRepeatMajorSection() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/repeats_test.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get("Repeat Major Section"));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music A = new Note(new Pitch('A'), 192.0);
+        Music B = new Note(new Pitch('B'), 192.0);
+        Music C = new Note(new Pitch('C'), 192.0);
+        Music D = new Note(new Pitch('D'), 192.0);
         
+        Music oneBlock =Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), A), C), D) , B);
+        Music expected = Music.concat(new Rest(0), Music.concat(oneBlock, oneBlock));
+        Music music = MusicParser.buildMusic(musicTree, header);
+        assertEquals("expected correctly parsed repeat", expected, music);                       
     }
     
     @Test
-    public void testBuildMusicRepeatSubsection() {
-        
+    public void testBuildMusicRepeatSubsection() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/repeats_test.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get("Repeat Within Repeat Block"));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music A = new Note(new Pitch('A'), 192.0);
+        Music B = new Note(new Pitch('B'), 192.0);
+        Music C = new Note(new Pitch('C'), 192.0);
+        Music D = new Note(new Pitch('D'), 192.0);
+        Music E = new Note(new Pitch('E'), 192.0);
+                
+        Music repeatBlock = Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), C), D), C), E);
+        Music repeat = Music.concat(repeatBlock, repeatBlock);
+        Music expected =Music.concat(new Rest(0), Music.concat(Music.concat(Music.concat(new Rest(0), A), B), repeat));
+        Music music = MusicParser.buildMusic(musicTree, header);
+        assertEquals("expected correctly parsed repeat", expected, music);                               
     }
     
     @Test
-    public void testBuildMusicRepeatDifferentEndings() {
-        
+    public void testBuildMusicRepeatDifferentEndings() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/repeats_test.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get("Two Endings"));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music A = new Note(new Pitch('A'), 192.0);
+        Music B = new Note(new Pitch('B'), 192.0);
+        Music C = new Note(new Pitch('C'), 192.0);
+        Music D = new Note(new Pitch('D'), 192.0);
+        Music E = new Note(new Pitch('E'), 192.0);
+                
+        Music firstRepeatBlock = Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), A), B), new Rest(0)), C);
+        Music secondRepeatBlock = Music.concat(Music.concat(Music.concat(new Rest(0), A), B), new Rest(0));
+        Music repeat = Music.concat(firstRepeatBlock, secondRepeatBlock);
+        Music expected = Music.concat(new Rest(0), Music.concat(Music.concat(new Rest(0), repeat), D));
+        Music music = MusicParser.buildMusic(musicTree, header);
+        assertEquals("expected correctly parsed repeat", expected, music);                               
     }
     
     @Test
-    public void testBuildMusicDefaultNoteAndTempoBaseNoteAreDifferent() {
+    public void testBuildMusicDefaultNoteAndTempoBaseNoteAreDifferent() throws UnableToParseException, IOException {
+        File musicFile = new File("sample_abc/different_tempo.abc");
+        Parser<AbcGrammar> headerParser = GrammarCompiler.compile(abcNotationGrammarFile, AbcGrammar.ROOT);
+        ParseTree<AbcGrammar> headerTree = headerParser.parse(musicFile);
+        Header header = HeaderParser.buildHeader(headerTree);
+        String musicString = String.join("", header.getVoices().get(""));
+        Parser<MusicGrammar> musicParser = GrammarCompiler.compile(musicGrammarFile, MusicGrammar.ROOT);
+        ParseTree<MusicGrammar> musicTree = musicParser.parse(musicString);
+        Music midAQuarterNote = new Note(new Pitch('A'), 192.0*2);
+        Music midAHalfNote = new Note(new Pitch('A'), 192.0*4);
+
         
+        Music expected = Music.concat(Music.concat(new Rest(0), midAQuarterNote), midAHalfNote);
+        System.out.println(expected);
+
+        Music music = MusicParser.buildMusic(musicTree, header);
+        assertEquals("expected correctly parsed key signature effect", Music.concat(new Rest(0), expected), music);                               
     }
 }
