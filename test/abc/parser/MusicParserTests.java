@@ -308,7 +308,6 @@ public class MusicParserTests {
         Music B = new Note(new Pitch('B'), 192.0);
         Music C = new Note(new Pitch('C'), 192.0);
         Music D = new Note(new Pitch('D'), 192.0);
-        Music E = new Note(new Pitch('E'), 192.0);
                 
         Music firstRepeatBlock = Music.concat(Music.concat(Music.concat(Music.concat(new Rest(0), A), B), new Rest(0)), C);
         Music secondRepeatBlock = Music.concat(Music.concat(Music.concat(new Rest(0), A), B), new Rest(0));
