@@ -24,7 +24,6 @@ public class Main {
     public static void play(String file) {
         File abcFile = new File(file);
         Header header = Music.parseHeader(abcFile);
-        System.out.println(header.toString());
         
         Music music = Music.parseMusic(header);
         try {
@@ -46,8 +45,6 @@ public class Main {
             throw new RuntimeException("No abc file specified!");
         } else {
             String fileName = args[0];
-            //String fileName = "sample_abc/abc_song.abc";
-            //String fileName = "sample_abc/little_night_music.abc";
             play(fileName);
         }
     }

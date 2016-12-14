@@ -19,26 +19,30 @@ public class PlayMusicTests {
      */
     
     @Test
-    public void testPlaySingleNote() {
+    public void testPlaySingleNote() throws InterruptedException {
         String testFileName = "sample_abc/single_note.abc";
         Main.play(testFileName);
+        Thread.sleep(1000);
     }
         
     @Test
-    public void testPlayNoteRestNote() {
+    public void testPlayNoteRestNote() throws InterruptedException {
         String testFileName = "sample_abc/note-rest.abc";
         Main.play(testFileName);  
+        Thread.sleep(1000);
     }
     
     @Test
-    public void testPlayConcatenation() {
+    public void testPlayConcatenation() throws InterruptedException {
         String testFileName = "sample_abc/noQ.abc";
-        Main.play(testFileName);   
+        Main.play(testFileName);  
+        Thread.sleep(100000);
     }
     
     @Test
-    public void testPlayMultipleVoices() {
-        String testFileName = "sample_abc/fure_elise.abc";
-        Main.play(testFileName);    
+    public void testPlayMultipleVoices() throws InterruptedException {
+        String testFileName = "sample_abc/fur_elise.abc";
+        Main.play(testFileName);  
+        Thread.sleep(1000000);
     }
 }
